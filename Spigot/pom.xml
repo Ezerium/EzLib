@@ -71,5 +71,10 @@
             <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.ezerium</groupId>
+            <artifactId>shared</artifactId>
+            <version>0.0.1-dev</version>
+        </dependency>
     </dependencies>
 </project>
