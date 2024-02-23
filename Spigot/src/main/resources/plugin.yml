@@ -1,0 +1,4 @@
+name: Spigot
+version: '${project.version}'
+main: com.ezerium.spigot.Spigot
+authors: [ grcq, IDuckz_ ]
