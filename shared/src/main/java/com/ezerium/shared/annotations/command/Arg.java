@@ -9,9 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Arg {
     String value();
-    String description();
     String defaultValue() default "";
 
-    boolean required();
     boolean wildcard();
 }

@@ -3,10 +3,17 @@ package com.ezerium.spigot.command;
 import com.ezerium.shared.annotations.Async;
 import com.ezerium.shared.annotations.command.*;
 import com.ezerium.shared.utils.ReflectionUtils;
+import com.ezerium.spigot.command.parameters.ParameterType;
+import com.ezerium.spigot.command.parameters.impl.BooleanParameterType;
+import com.ezerium.spigot.command.parameters.impl.IntegerParameterType;
+import com.ezerium.spigot.command.parameters.impl.PlayerParameterType;
+import com.ezerium.spigot.command.parameters.impl.StringParameterType;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.SimplePluginManager;
 
@@ -21,6 +28,9 @@ public class CommandHandler {
     private Map<String, org.bukkit.command.Command> knownCommands;
 
     private Map<String, CommandNode> registeredCommands;
+
+    @Getter
+    private Map<Class<?>, ParameterType<?>> parameterTypes;
 
     private void updateMap() {
         PluginManager pluginManager = Bukkit.getServer().getPluginManager();
@@ -42,6 +52,13 @@ public class CommandHandler {
         this.updateMap();
 
         this.registeredCommands = new HashMap<>();
+        this.parameterTypes = new HashMap<>();
+
+        this.init();
+    }
+
+    public void registerParameterType(Class<?> clazz, ParameterType<?> parameterType) {
+        this.parameterTypes.put(clazz, parameterType);
     }
 
     public void register(Class<?> clazz) {
@@ -60,6 +77,7 @@ public class CommandHandler {
             CommandNode parent;
             if (!this.registeredCommands.containsKey(command)) {
                 parent = new CommandNode(
+                        this,
                         null,
                         command,
                         new String[0],
@@ -75,6 +93,7 @@ public class CommandHandler {
             } else parent = this.registeredCommands.get(command);
 
             parent.addChild(new CommandNode(
+                    this,
                     method,
                     annotation.value().replace(command + " ", ""),
                     method.getAnnotation(Aliases.class) == null ? annotation.aliases() : method.getAnnotation(Aliases.class).value(),
@@ -91,6 +110,7 @@ public class CommandHandler {
 
         Aliases aliases = method.getAnnotation(Aliases.class);
         CommandNode node = new CommandNode(
+                this,
                 method,
                 annotation.value(),
                 aliases == null ? annotation.aliases() : aliases.value(),
@@ -111,6 +131,15 @@ public class CommandHandler {
 
         this.commandMap.register(command.getName(), command);
         Bukkit.getServer().getHelpMap().addTopic(helpTopic);
+    }
+
+    private void init() {
+        this.registerParameterType(String.class, new StringParameterType());
+        this.registerParameterType(Player.class, new PlayerParameterType());
+        this.registerParameterType(int.class, new IntegerParameterType());
+        this.registerParameterType(Integer.class, new IntegerParameterType());
+        this.registerParameterType(boolean.class, new BooleanParameterType());
+        this.registerParameterType(Boolean.class, new BooleanParameterType());
     }
 
 }
