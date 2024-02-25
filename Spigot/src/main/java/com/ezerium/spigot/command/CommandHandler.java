@@ -3,6 +3,7 @@ package com.ezerium.spigot.command;
 import com.ezerium.shared.annotations.Async;
 import com.ezerium.shared.annotations.command.*;
 import com.ezerium.shared.utils.ReflectionUtils;
+import com.ezerium.spigot.Spigot;
 import com.ezerium.spigot.command.parameters.ParameterType;
 import com.ezerium.spigot.command.parameters.impl.BooleanParameterType;
 import com.ezerium.spigot.command.parameters.impl.IntegerParameterType;
@@ -129,7 +130,7 @@ public class CommandHandler {
             oldCommand.unregister(this.commandMap);
         }
 
-        this.commandMap.register(command.getName(), command);
+        this.commandMap.register(Spigot.INSTANCE.getPlugin().getDescription().getName().toLowerCase().replace(" ", "_"), command);
         Bukkit.getServer().getHelpMap().addTopic(helpTopic);
     }
 

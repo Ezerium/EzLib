@@ -45,6 +45,7 @@ public class MySQL implements IDatabase {
     public void disconnect() {
         try {
             this.connection.close();
+            this.connection = null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,7 +57,6 @@ public class MySQL implements IDatabase {
         return "jdbc:mysql://" + this.host + "/" + this.database + "?user=" + this.username + "&password=" + this.password + "&useSSL=" + this.useSSL;
     }
 
-    @Override
     public ResultSet execute(String query, Object... params) throws SQLException {
         PreparedStatement preparedStatement = this.connection.prepareStatement(query);
         for(int i = 0; i < params.length; i++) preparedStatement.setObject(i + 1, params[i]);
@@ -64,7 +64,6 @@ public class MySQL implements IDatabase {
         return preparedStatement.executeQuery();
     }
 
-    @Override
     public void update(String query, Object... params) throws SQLException {
         PreparedStatement preparedStatement = this.connection.prepareStatement(query);
         for(int i = 0; i < params.length; i++) preparedStatement.setObject(i + 1, params[i]);
@@ -72,7 +71,6 @@ public class MySQL implements IDatabase {
         preparedStatement.executeUpdate();
     }
 
-    @Override
     public CompletableFuture<ResultSet> executeAsync(String query, Object... params) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -84,7 +82,6 @@ public class MySQL implements IDatabase {
         });
     }
 
-    @Override
     public CompletableFuture<Void> updateAsync(String query, Object... params) {
         return CompletableFuture.runAsync(() -> {
             try {

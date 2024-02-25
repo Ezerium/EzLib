@@ -1,15 +1,30 @@
 package com.ezerium.database.impl;
 
 import com.ezerium.database.IDatabase;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Setter;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @Data
 public class MongoDB implements IDatabase {
+
+    @Setter(AccessLevel.NONE)
+    private MongoClient client;
+    @Setter(AccessLevel.NONE)
+    private MongoDatabase mongoDatabase;
 
     private final String host;
     private final String username;
@@ -17,6 +32,8 @@ public class MongoDB implements IDatabase {
     private final String database;
 
     private String w = "majority";
+
+    private final Map<String, MongoCollection<Document>> collections = new HashMap<>();
 
     public MongoDB(String address, int port, String username, String password, String database) {
         this(address + ":" + port, username, password, database);
@@ -30,17 +47,16 @@ public class MongoDB implements IDatabase {
     }
 
     @Override
-    public Connection getConnection() {
-        return null;
-    }
-
-    @Override
-    public void connect() throws SQLException {
+    public void connect() {
+        this.client = MongoClients.create(this.getURI());
+        this.mongoDatabase = this.client.getDatabase(this.database);
     }
 
     @Override
     public void disconnect() {
-
+        this.client.close();
+        this.mongoDatabase = null;
+        this.client = null;
     }
 
     @NotNull
@@ -49,23 +65,77 @@ public class MongoDB implements IDatabase {
         return "mongodb" + (host.split(":").length > 1 ? "+srv" : "") + "://" + this.host + "@" + username + ":" + password + "/" + this.database;
     }
 
-    @Override
-    public ResultSet execute(String s, Object... params) throws SQLException {
-        return null;
+    public MongoDB addCollection(String name) {
+        this.collections.put(name, this.mongoDatabase.getCollection(name));
+        return this;
     }
 
-    @Override
-    public void update(String query, Object... params) throws SQLException {
-        return;
+    public MongoCollection<Document> getCollection(String name) {
+        return this.collections.get(name);
     }
 
-    @Override
-    public CompletableFuture<ResultSet> executeAsync(String query, Object... params) {
-        return null;
+    public CompletableFuture<Void> insertAsync(String collection, Document document) {
+        return CompletableFuture.runAsync(() -> this.collections.get(collection).insertOne(document));
     }
 
-    @Override
-    public CompletableFuture<Void> updateAsync(String query, Object... params) {
-        return null;
+    public CompletableFuture<Void> updateAsync(String collection, Document filter, Document update) {
+        return CompletableFuture.runAsync(() -> this.collections.get(collection).updateOne(filter, update));
     }
+
+    public CompletableFuture<Void> replaceAsync(String collection, Document filter, Document replacement) {
+        return CompletableFuture.runAsync(() -> this.collections.get(collection).replaceOne(filter, replacement));
+    }
+
+    public CompletableFuture<Void> deleteAsync(String collection, Document filter) {
+        return CompletableFuture.runAsync(() -> this.collections.get(collection).deleteOne(filter));
+    }
+
+    public CompletableFuture<Document> findAsync(String collection, Document filter) {
+        return CompletableFuture.supplyAsync(() -> this.collections.get(collection).find(filter).first());
+    }
+
+    public CompletableFuture<Void> insertManyAsync(String collection, Document... documents) {
+        return CompletableFuture.runAsync(() -> this.collections.get(collection).insertMany(Arrays.asList(documents)));
+    }
+
+    public CompletableFuture<Void> updateManyAsync(String collection, Document filter, Document update) {
+        return CompletableFuture.runAsync(() -> this.collections.get(collection).updateMany(filter, update));
+    }
+
+    public CompletableFuture<Void> deleteManyAsync(String collection, Document filter) {
+        return CompletableFuture.runAsync(() -> this.collections.get(collection).deleteMany(filter));
+    }
+
+    public Document find(String collection, Document filter) {
+        return this.collections.get(collection).find(filter).first();
+    }
+
+    public void insert(String collection, Document document) {
+        this.collections.get(collection).insertOne(document);
+    }
+
+    public void update(String collection, Document filter, Document update) {
+        this.collections.get(collection).updateOne(filter, update);
+    }
+
+    public void replace(String collection, Document filter, Document replacement) {
+        this.collections.get(collection).replaceOne(filter, replacement);
+    }
+
+    public void delete(String collection, Document filter) {
+        this.collections.get(collection).deleteOne(filter);
+    }
+
+    public void insertMany(String collection, Document... documents) {
+        this.collections.get(collection).insertMany(Arrays.asList(documents));
+    }
+
+    public void updateMany(String collection, Document filter, Document update) {
+        this.collections.get(collection).updateMany(filter, update);
+    }
+
+    public void deleteMany(String collection, Document filter) {
+        this.collections.get(collection).deleteMany(filter);
+    }
+
 }

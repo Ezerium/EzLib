@@ -9,21 +9,10 @@ import java.util.concurrent.CompletableFuture;
 
 public interface IDatabase {
 
-    Connection getConnection();
-
-    void connect() throws SQLException;
+    void connect();
 
     void disconnect();
 
     @NotNull
     String getURI();
-
-    ResultSet execute(String query, Object... params) throws SQLException;
-
-    void update(String query, Object... params) throws SQLException;
-
-    CompletableFuture<ResultSet> executeAsync(String query, Object... params);
-
-    CompletableFuture<Void> updateAsync(String query, Object... params);
-
 }

@@ -1,6 +1,7 @@
 package com.ezerium.spigot.inject.impl;
 
 import com.ezerium.shared.inject.Injector;
+import com.ezerium.spigot.Spigot;
 
 import java.lang.reflect.Field;
 
@@ -18,6 +19,13 @@ public class InjectPluginField implements Injector {
             case "IDatabase":
                 try {
                     field.set(object, null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
+            case "Config":
+                try {
+                    field.set(object, Spigot.INSTANCE.getConfig());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

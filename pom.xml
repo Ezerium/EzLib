@@ -12,6 +12,7 @@
         <module>shared</module>
         <module>Core</module>
         <module>Spigot</module>
+        <module>build</module>
     </modules>
 
     <properties>
