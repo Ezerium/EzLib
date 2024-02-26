@@ -61,9 +61,9 @@ public class CommandNode {
         this.method = method;
         this.name = name;
         this.aliases = aliases;
-        this.description = (description.value().isEmpty() ? null : description.value());
-        this.permission = (permission.value().isEmpty() ? null : permission.value());
-        this.usage = (usage.value().isEmpty() ? null : usage.value());
+        this.description = (description == null || description.value().isEmpty() ? null : description.value());
+        this.permission = (permission == null || permission.value().isEmpty() ? null : permission.value());
+        this.usage = (usage == null || usage.value().isEmpty() ? null : usage.value());
 
         this.async = async != null;
 
