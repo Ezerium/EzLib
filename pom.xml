@@ -13,6 +13,7 @@
         <module>Core</module>
         <module>Spigot</module>
         <module>build</module>
+        <module>build</module>
     </modules>
 
     <properties>
@@ -35,6 +36,11 @@
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.12.14</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>23-ea+3</version>
         </dependency>
     </dependencies>
 
