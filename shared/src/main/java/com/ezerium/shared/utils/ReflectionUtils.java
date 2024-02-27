@@ -12,7 +12,7 @@ public class ReflectionUtils {
     public static Object getFieldValue(Object object, String fieldName) {
         try {
             Field field = object.getClass().getDeclaredField(fieldName);
-            boolean isAccessible = field.canAccess(object);
+            boolean isAccessible = field.isAccessible();
             if (!isAccessible) field.setAccessible(true);
 
             Object value = field.get(object);
