@@ -9,7 +9,6 @@
         <version>0.0.1-dev</version>
     </parent>
 
-    <groupId>com.ezerium</groupId>
     <artifactId>shared</artifactId>
 
     <properties>
@@ -17,5 +16,39 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>de.icongmbh.oss.maven.plugins</groupId>
+                <artifactId>javassist-maven-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <includeTestClasses>false</includeTestClasses>
+                    <transformerClasses>
+                        <transformerClass>
+                            <className>com.ezerium.shared.bytecode.DebugTransformer</className>
+                        </transformerClass>
+                    </transformerClasses>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>javassist</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.icongmbh.oss.maven.plugins</groupId>
+            <artifactId>javassist-maven-plugin</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+    </dependencies>
 
 </project>

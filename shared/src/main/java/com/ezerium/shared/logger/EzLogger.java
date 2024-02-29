@@ -26,4 +26,8 @@ public class EzLogger {
         System.out.println("INFO: " + message);
     }
 
+    public static void debug(String message) {
+        System.out.println("\u001B[34m[DEBUG] \u001B[37m" + message);
+    }
+
 }

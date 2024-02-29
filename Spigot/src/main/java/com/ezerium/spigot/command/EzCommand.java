@@ -1,6 +1,7 @@
 package com.ezerium.spigot.command;
 
 import com.ezerium.shared.logger.EzLogger;
+import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -14,7 +15,7 @@ public class EzCommand extends Command {
     private final CommandNode node;
 
     public EzCommand(CommandNode node) {
-        super(node.getName(), node.getDescription(), node.getUsage(), List.of(node.getAliases()));
+        super(node.getName(), node.getDescription(), node.getUsage(), Lists.newArrayList(node.getAliases()));
         this.node = node;
     }
 

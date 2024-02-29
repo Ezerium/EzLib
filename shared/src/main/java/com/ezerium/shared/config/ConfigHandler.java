@@ -5,7 +5,6 @@ import com.ezerium.shared.annotations.config.ConfigValue;
 import com.ezerium.shared.annotations.config.Configuration;
 import com.ezerium.shared.utils.DataUtil;
 import com.ezerium.shared.utils.ReflectionUtils;
-import javafx.beans.value.ChangeListener;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

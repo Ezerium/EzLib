@@ -12,10 +12,44 @@
     <artifactId>Core</artifactId>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>de.icongmbh.oss.maven.plugins</groupId>
+                <artifactId>javassist-maven-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <includeTestClasses>false</includeTestClasses>
+                    <transformerClasses>
+                        <transformerClass>
+                            <className>com.ezerium.shared.bytecode.DebugTransformer</className>
+                        </transformerClass>
+                    </transformerClasses>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>javassist</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
