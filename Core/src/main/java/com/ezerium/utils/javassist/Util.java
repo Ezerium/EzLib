@@ -3,6 +3,10 @@ package com.ezerium.utils.javassist;
 import javassist.*;
 import javassist.bytecode.AnnotationsAttribute;
 
+import java.lang.reflect.Method;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 public class Util {
 
     public static void deleteAnnotationIfPresent(CtClass ctClass, Class<?> annotation) {
@@ -36,6 +40,32 @@ public class Util {
 
     public static AnnotationsAttribute getAnnotationsAttribute(CtField ctField) {
         return (AnnotationsAttribute) ctField.getFieldInfo().getAttribute(AnnotationsAttribute.visibleTag);
+    }
+
+    public static void runAsync(String methodName, Object instance, Object... args) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                Method method = instance.getClass().getDeclaredMethod(methodName);
+                method.invoke(instance, args);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public static Object runAsyncWithReturn(String methodName, Object instance, Object... args) {
+        try {
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    Method method = instance.getClass().getDeclaredMethod(methodName);
+                    return method.invoke(instance, args);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

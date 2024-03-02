@@ -27,7 +27,7 @@ public class EzLogger {
     }
 
     public static void debug(String message) {
-        System.out.println("\u001B[34m[DEBUG] \u001B[37m" + message);
+        System.out.println("\u001B[34m[DEBUG] \u001B[0m" + message);
     }
 
 }

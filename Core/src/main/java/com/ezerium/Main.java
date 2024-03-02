@@ -1,11 +1,11 @@
 package com.ezerium;
 
+import com.ezerium.annotations.Async;
 import com.ezerium.annotations.Cache;
 import com.ezerium.annotations.Debug;
+import com.ezerium.annotations.Timer;
 import com.ezerium.annotations.config.Configuration;
 import com.ezerium.annotations.test.GeneratedTest;
-import com.ezerium.utils.CacheUtils;
-import com.ezerium.utils.DataUtil;
 
 /**
  * Main class is mainly for testing purposes.
@@ -26,7 +26,7 @@ public class Main {
         main.test2("def");
         main.test2("def");
 
-        System.out.println(CacheUtils.cache);
+        //System.out.println(CacheUtils.cache);
     }
 
     @Debug(logOnCall = "test {this.test} aa {this.test} {test}")
@@ -35,6 +35,7 @@ public class Main {
 
     }
 
+    @Timer
     @Cache(cacheByParameter = "abc")
     public String test2(String abc) {
         String idk = "hello";
@@ -42,7 +43,19 @@ public class Main {
             return "abcdefg";
         }
 
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         return abc + idk;
+    }
+
+    @Async
+    public String test3() {
+        System.out.println("test3");
+        return "test3";
     }
 
 }

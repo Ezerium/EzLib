@@ -32,6 +32,12 @@
                         <transformerClass>
                             <className>com.ezerium.bytecode.cache.CacheTransformer</className>
                         </transformerClass>
+                        <transformerClass>
+                            <className>com.ezerium.bytecode.async.AsyncTransformer</className>
+                        </transformerClass>
+                        <transformerClass>
+                            <className>com.ezerium.bytecode.timer.TimerTransformer</className>
+                        </transformerClass>
                     </transformerClasses>
                 </configuration>
                 <executions>
@@ -47,6 +53,7 @@
     </build>
 
     <dependencies>
+
         <dependency>
             <groupId>de.icongmbh.oss.maven.plugins</groupId>
             <artifactId>javassist-maven-plugin</artifactId>

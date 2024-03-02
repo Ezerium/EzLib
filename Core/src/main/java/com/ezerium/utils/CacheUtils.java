@@ -8,7 +8,7 @@ import java.util.Map;
 @UtilityClass
 public class CacheUtils {
 
-    public static Map<String, Object> cache = new HashMap<>();
+    private static Map<String, Object> cache = new HashMap<>();
 
     public static void put(String key, Object value) {
         cache.put(key, value);
