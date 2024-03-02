@@ -27,9 +27,7 @@ public abstract class EzClassTransformer extends ClassTransformer {
             case CLASS:
                 return ctClass.hasAnnotation(this.getAnnotation());
             case METHOD:
-                boolean hasMethodAnnotation = Arrays.stream(ctClass.getDeclaredMethods()).anyMatch(method -> method.hasAnnotation(this.getAnnotation()));
-                System.out.println(ctClass.getName() + " has method annotation: " + hasMethodAnnotation);
-                return hasMethodAnnotation;
+                return Arrays.stream(ctClass.getDeclaredMethods()).anyMatch(method -> method.hasAnnotation(this.getAnnotation()));
             case FIELD:
                 return Arrays.stream(ctClass.getDeclaredFields()).anyMatch(field -> field.hasAnnotation(this.getAnnotation()));
             default:

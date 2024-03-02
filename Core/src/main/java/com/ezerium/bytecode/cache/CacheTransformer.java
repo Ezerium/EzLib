@@ -29,7 +29,7 @@ public class CacheTransformer extends EzClassTransformer {
             String cacheByParam = cache.cacheByParameter();
 
             String cacheId = "\"" + id + "\"" + (cacheByParam.isEmpty() ? "" : " + " + cacheByParam + ".toString()");
-            method.insertBefore("if (com.ezerium.utils.CacheUtils.isCached(" + cacheId + ")) { return com.ezerium.utils.CacheUtils.getCache(" + cacheId + "); }");
+            method.insertBefore("if (com.ezerium.utils.CacheUtils.isCached(" + cacheId + ")) { return ($r) com.ezerium.utils.CacheUtils.getCache(" + cacheId + "); }");
 
             // remove return and put it in a variable
             method.insertAfter("com.ezerium.utils.CacheUtils.put(" + cacheId + ", $_);");

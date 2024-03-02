@@ -4,6 +4,8 @@ import com.ezerium.annotations.Cache;
 import com.ezerium.annotations.Debug;
 import com.ezerium.annotations.config.Configuration;
 import com.ezerium.annotations.test.GeneratedTest;
+import com.ezerium.utils.CacheUtils;
+import com.ezerium.utils.DataUtil;
 
 /**
  * Main class is mainly for testing purposes.
@@ -23,6 +25,8 @@ public class Main {
         main.test2("abc");
         main.test2("def");
         main.test2("def");
+
+        System.out.println(CacheUtils.cache);
     }
 
     @Debug(logOnCall = "test {this.test} aa {this.test} {test}")
