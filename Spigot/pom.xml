@@ -73,7 +73,7 @@
         </dependency>
         <dependency>
             <groupId>com.ezerium</groupId>
-            <artifactId>shared</artifactId>
+            <artifactId>Core</artifactId>
             <version>0.0.1-dev</version>
         </dependency>
     </dependencies>

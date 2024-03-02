@@ -1,8 +1,8 @@
 package com.ezerium.spigot.command.arguments;
 
-import com.ezerium.shared.annotations.command.Arg;
-import com.ezerium.shared.annotations.command.Flag;
-import com.ezerium.shared.annotations.command.FlagValue;
+import com.ezerium.annotations.command.Arg;
+import com.ezerium.annotations.command.Flag;
+import com.ezerium.annotations.command.FlagValue;
 import com.ezerium.spigot.command.CommandHandler;
 import com.ezerium.spigot.command.parameters.ParameterType;
 import org.bukkit.command.CommandSender;

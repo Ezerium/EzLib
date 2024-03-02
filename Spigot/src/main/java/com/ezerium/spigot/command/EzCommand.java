@@ -1,8 +1,7 @@
 package com.ezerium.spigot.command;
 
-import com.ezerium.shared.logger.EzLogger;
+import com.ezerium.logger.EzLogger;
 import com.google.common.collect.Lists;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 

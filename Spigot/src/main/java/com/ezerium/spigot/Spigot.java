@@ -1,6 +1,6 @@
 package com.ezerium.spigot;
 
-import com.ezerium.shared.inject.InjectHandler;
+import com.ezerium.inject.InjectHandler;
 import com.ezerium.spigot.inject.impl.InjectPluginField;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;

@@ -12,21 +12,13 @@
     <artifactId>Core</artifactId>
 
     <properties>
-        <java.version>11</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>de.icongmbh.oss.maven.plugins</groupId>
                 <artifactId>javassist-maven-plugin</artifactId>
@@ -35,7 +27,10 @@
                     <includeTestClasses>false</includeTestClasses>
                     <transformerClasses>
                         <transformerClass>
-                            <className>com.ezerium.shared.bytecode.DebugTransformer</className>
+                            <className>com.ezerium.bytecode.debug.DebugTransformer</className>
+                        </transformerClass>
+                        <transformerClass>
+                            <className>com.ezerium.bytecode.cache.CacheTransformer</className>
                         </transformerClass>
                     </transformerClasses>
                 </configuration>
@@ -53,9 +48,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ezerium</groupId>
-            <artifactId>shared</artifactId>
-            <version>0.0.1-dev</version>
+            <groupId>de.icongmbh.oss.maven.plugins</groupId>
+            <artifactId>javassist-maven-plugin</artifactId>
+            <version>2.0.2</version>
         </dependency>
     </dependencies>
 

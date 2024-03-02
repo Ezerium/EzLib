@@ -1,9 +1,9 @@
 package com.ezerium.spigot.command;
 
-import com.ezerium.shared.annotations.Async;
-import com.ezerium.shared.annotations.command.*;
-import com.ezerium.shared.logger.EzLogger;
-import com.ezerium.shared.utils.CooldownUtil;
+import com.ezerium.annotations.Async;
+import com.ezerium.annotations.command.*;
+import com.ezerium.logger.EzLogger;
+import com.ezerium.utils.CooldownUtil;
 import com.ezerium.spigot.Config;
 import com.ezerium.spigot.Spigot;
 import com.ezerium.spigot.command.arguments.Argument;

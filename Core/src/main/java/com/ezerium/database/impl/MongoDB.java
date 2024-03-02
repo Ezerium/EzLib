@@ -6,13 +6,11 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Setter;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

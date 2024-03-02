@@ -1,6 +1,6 @@
 package com.ezerium.spigot.inject.impl;
 
-import com.ezerium.shared.inject.Injector;
+import com.ezerium.inject.Injector;
 import com.ezerium.spigot.Spigot;
 
 import java.lang.reflect.Field;

@@ -9,7 +9,6 @@
     <version>0.0.1-dev</version>
     <packaging>pom</packaging>
     <modules>
-        <module>shared</module>
         <module>Core</module>
         <module>Spigot</module>
         <module>build</module>
