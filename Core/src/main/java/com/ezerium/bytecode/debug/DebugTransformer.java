@@ -10,6 +10,8 @@ import javassist.CtMethod;
 import javassist.build.JavassistBuildException;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,12 +33,17 @@ public class DebugTransformer extends EzClassTransformer {
             DebugAt debugAt = debug.debugAt();
 
             Pattern pattern = Pattern.compile("\\{[\\w._]+}");
-            if (pattern.matcher(logOnCall).find()) {
+            Matcher matcher = pattern.matcher(logOnCall);
+            boolean found = matcher.find();
+            List<String> variables = new ArrayList<>();
+            if (found) {
                 String[] split = logOnCall.split("\\{");
                 StringBuilder sb = new StringBuilder();
                 for (String s : split) {
                     if (s.contains("}")) {
                         String[] split1 = s.split("}");
+                        variables.add(split1[0]);
+
                         sb.append("\" + ").append(split1[0]).append(" + \"");
                         if (split1.length > 1) {
                             sb.append(split1[1]);
@@ -48,19 +55,21 @@ public class DebugTransformer extends EzClassTransformer {
                 logOnCall = sb.toString();
             }
 
-            System.out.println(method.getLongName());
             if (debugAt == DebugAt.START) {
                 method.insertAfter("com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
             } else if (debugAt == DebugAt.END) {
                 method.insertAfter("com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
             } else {
                 // find the last assignment or variable from {variableName} and insert after that
-                Matcher matcher = pattern.matcher(logOnCall);
-                if (matcher.find()) {
-                    String group = matcher.group();
-                    String variableName = group.substring(1, group.length() - 1);
+                if (!variables.isEmpty()) {
+                    String variableName = variables.get(0);
 
-                    method.insertAt(Util.findLastAssignmentOrVariable(method, variableName), "com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
+                    int index = Util.findLastAssignmentOrVariable(method, variableName);
+                    if (index == -1) {
+                        index = 0;
+                    }
+
+                    method.insertAt(index, "com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
                 } else {
                     method.insertAfter("com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
                 }

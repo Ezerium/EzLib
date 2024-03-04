@@ -71,17 +71,23 @@ public class Util {
     }
 
     public static int findLastAssignmentOrVariable(CtMethod method, String variableName) {
-        /*CodeIterator iterator = method.getMethodInfo().getCodeAttribute().iterator();
-        while (iterator.hasNext()) {
-            int index = iterator.next();
-            int op = iterator.byteAt(index);
-            if (op == Opcode.ASTORE) {
-                int localVarIndex = iterator.byteAt(index + 1);
-                if (localVarIndex == method.getMethodInfo().getCodeAttribute().getLocalVariableAttribute().nameIndex(variableName)) {
-                    return index;
+        CodeIterator iterator = method.getMethodInfo().getCodeAttribute().iterator();
+        try {
+            while (iterator.hasNext()) {
+                int index = iterator.next();
+                int op = iterator.byteAt(index);
+
+                if (op == Opcode.ASTORE) {
+                    int localVar = iterator.byteAt(index + 1);
+                    if (localVar == /*method.getMethodInfo().getConstPool().lookup(variableName)*/ 0) {
+                        return index;
+                    }
                 }
             }
-        }*/
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return -1;
     }
 }
