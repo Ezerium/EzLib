@@ -11,6 +11,7 @@ import javassist.build.JavassistBuildException;
 
 import java.lang.annotation.Annotation;
 import java.util.Properties;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //@TransformByAnnotation(Debug.class)
@@ -47,10 +48,22 @@ public class DebugTransformer extends EzClassTransformer {
                 logOnCall = sb.toString();
             }
 
+            System.out.println(method.getLongName());
             if (debugAt == DebugAt.START) {
                 method.insertAfter("com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
             } else if (debugAt == DebugAt.END) {
                 method.insertAfter("com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
+            } else {
+                // find the last assignment or variable from {variableName} and insert after that
+                Matcher matcher = pattern.matcher(logOnCall);
+                if (matcher.find()) {
+                    String group = matcher.group();
+                    String variableName = group.substring(1, group.length() - 1);
+
+                    method.insertAt(Util.findLastAssignmentOrVariable(method, variableName), "com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
+                } else {
+                    method.insertAfter("com.ezerium.logger.EzLogger.debug(\"" + logOnCall + "\");");
+                }
             }
 
             Util.deleteAnnotationIfPresent(method, Debug.class);

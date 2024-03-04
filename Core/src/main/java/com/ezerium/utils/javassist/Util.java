@@ -2,6 +2,8 @@ package com.ezerium.utils.javassist;
 
 import javassist.*;
 import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.CodeIterator;
+import javassist.bytecode.Opcode;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
@@ -68,4 +70,18 @@ public class Util {
         }
     }
 
+    public static int findLastAssignmentOrVariable(CtMethod method, String variableName) {
+        /*CodeIterator iterator = method.getMethodInfo().getCodeAttribute().iterator();
+        while (iterator.hasNext()) {
+            int index = iterator.next();
+            int op = iterator.byteAt(index);
+            if (op == Opcode.ASTORE) {
+                int localVarIndex = iterator.byteAt(index + 1);
+                if (localVarIndex == method.getMethodInfo().getCodeAttribute().getLocalVariableAttribute().nameIndex(variableName)) {
+                    return index;
+                }
+            }
+        }*/
+        return -1;
+    }
 }

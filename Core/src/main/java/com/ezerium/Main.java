@@ -6,6 +6,7 @@ import com.ezerium.annotations.Debug;
 import com.ezerium.annotations.Timer;
 import com.ezerium.annotations.config.Configuration;
 import com.ezerium.annotations.test.GeneratedTest;
+import com.ezerium.logger.debug.DebugAt;
 
 /**
  * Main class is mainly for testing purposes.
@@ -29,10 +30,10 @@ public class Main {
         //System.out.println(CacheUtils.cache);
     }
 
-    @Debug(logOnCall = "test {this.test} aa {this.test} {test}")
+    @Debug(logOnCall = "test {abc}", debugAt = DebugAt.AUTO)
     @GeneratedTest
     public void test() {
-
+        String abc = "abc";
     }
 
     @Timer
