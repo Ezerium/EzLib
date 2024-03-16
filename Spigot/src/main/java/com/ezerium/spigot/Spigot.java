@@ -1,6 +1,7 @@
 package com.ezerium.spigot;
 
 import com.ezerium.inject.InjectHandler;
+import com.ezerium.spigot.chat.ChatInputListener;
 import com.ezerium.spigot.inject.impl.InjectPluginField;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,6 +32,8 @@ public final class Spigot {
         }
 
         INSTANCE = this;
+
+        this.plugin.getServer().getPluginManager().registerEvents(new ChatInputListener(), this.plugin);
     }
 
 }
