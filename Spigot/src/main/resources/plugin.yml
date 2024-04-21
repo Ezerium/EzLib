@@ -1,4 +1,5 @@
 name: Spigot
+description: Java Library for Spigot
 version: '${project.version}'
-main: com.ezerium.spigot.Spigot
+main: com.ezerium.spigot.Main
 authors: [ grcq, IDuckz_ ]

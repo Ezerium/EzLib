@@ -6,6 +6,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.regex.Pattern;
+
 @UtilityClass
 public class Util {
 
@@ -31,6 +33,12 @@ public class Util {
 
     public static String getVersion() {
         return Bukkit.getServer().getClass().getPackage().getImplementationVersion();
+    }
+
+    public static int getVersionInt() {
+        String version = Bukkit.getBukkitVersion().split("-")[0];
+        if (version.split("\\.").length == 2) version += ".0";
+        return Integer.parseInt(version.replace(".", ""));
     }
 
     @Nullable

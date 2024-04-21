@@ -12,7 +12,7 @@ import com.ezerium.logger.debug.DebugAt;
  * Main class is mainly for testing purposes.
  */
 @Configuration("main")
-public class Main {
+public final class Main {
 
     public String test = "abc";
 

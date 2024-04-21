@@ -40,12 +40,16 @@
   </build>
   <repositories>
     <repository>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/content/groups/public/</url>
+    </repository>
+    <repository>
       <id>spigotmc-repo</id>
       <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <repository>
-      <id>sonatype</id>
-      <url>https://oss.sonatype.org/content/groups/public/</url>
+      <id>minecraft-repo</id>
+      <url>https://libraries.minecraft.net/</url>
     </repository>
   </repositories>
   <dependencies>
@@ -55,9 +59,15 @@
       <version>1.12.2-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.mojang</groupId>
+      <artifactId>authlib</artifactId>
+      <version>1.5.25</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <properties>
-    <java.version>11</java.version>
+    <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>

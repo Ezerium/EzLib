@@ -2,13 +2,11 @@ package com.ezerium.spigot.command;
 
 import com.ezerium.annotations.Async;
 import com.ezerium.annotations.command.*;
+import com.ezerium.utils.ClassUtil;
 import com.ezerium.utils.ReflectionUtils;
 import com.ezerium.spigot.Spigot;
 import com.ezerium.spigot.command.parameters.ParameterType;
-import com.ezerium.spigot.command.parameters.impl.BooleanParameterType;
-import com.ezerium.spigot.command.parameters.impl.IntegerParameterType;
-import com.ezerium.spigot.command.parameters.impl.PlayerParameterType;
-import com.ezerium.spigot.command.parameters.impl.StringParameterType;
+import com.ezerium.spigot.command.parameters.impl.*;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
@@ -16,6 +14,7 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.SimplePluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -58,6 +57,12 @@ public class CommandHandler {
 
     public void registerParameterType(Class<?> clazz, ParameterType<?> parameterType) {
         this.parameterTypes.put(clazz, parameterType);
+    }
+
+    public void registerAll(JavaPlugin plugin) {
+        for (Class<?> clazz : ClassUtil.getClassesInPackage(plugin.getClass(), plugin.getClass().getPackage().getName())) {
+            this.register(clazz);
+        }
     }
 
     public void register(Class<?> clazz) {

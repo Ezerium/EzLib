@@ -11,6 +11,7 @@ import com.ezerium.spigot.command.arguments.ArgumentParser;
 import com.ezerium.spigot.command.arguments.ArgumentType;
 import com.ezerium.spigot.command.parameters.ParameterType;
 import com.ezerium.spigot.utils.Util;
+import com.google.common.collect.Lists;
 import lombok.Data;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -37,11 +39,8 @@ public class CommandNode {
 
     private final String name;
     private final String[] aliases;
-    @Nullable
     private final String description;
-    @Nullable
     private final String permission;
-    @Nullable
     private final String usage;
 
     private final boolean async;
@@ -61,9 +60,9 @@ public class CommandNode {
         this.method = method;
         this.name = name;
         this.aliases = aliases;
-        this.description = (description == null || description.value().isEmpty() ? null : description.value());
-        this.permission = (permission == null || permission.value().isEmpty() ? null : permission.value());
-        this.usage = (usage == null || usage.value().isEmpty() ? null : usage.value());
+        this.description = (description == null || description.value().isEmpty() ? "" : description.value());
+        this.permission = (permission == null || permission.value().isEmpty() ? "" : permission.value());
+        this.usage = (usage == null || usage.value().isEmpty() ? "" : usage.value());
 
         this.async = async != null;
 
@@ -116,19 +115,20 @@ public class CommandNode {
     }
 
     public String getUsageMessage() {
-        if (this.usage != null) {
+        if (!this.usage.isEmpty()) {
             String usage = this.usage;
             usage = usage.replaceAll("\\{command}", this.name);
 
             String regex = "\\{args:(\\d+)}";
             Pattern pattern = Pattern.compile(regex);
-            if (pattern.matcher(usage).find()) {
+            Matcher matcher = pattern.matcher(usage);
+            if (matcher.find()) {
                 AtomicReference<String> finalUsage = new AtomicReference<>(usage);
-                pattern.matcher(usage).results().forEach(matchResult -> {
-                    int index = Integer.parseInt(matchResult.group(1)) - 1;
+                for (int i = 0; i < matcher.groupCount(); i++) {
+                    int index = Integer.parseInt(matcher.group(i)) - 1;
                     String parameterUsage = this.getParameterUsage(this.method.getParameters()[index]);
                     finalUsage.set(finalUsage.get().replaceAll(regex, parameterUsage));
-                });
+                }
             } else {
                 Method m = this.method;
                 if (m == null) m = this.parentNode.getMethod();
@@ -145,7 +145,6 @@ public class CommandNode {
             return Util.format(usage);
         }
 
-        // TODO: generate usage message whereas if the command has children, it will list them and if only one or no children, it will display a simple usage of the command
         Config config = Spigot.INSTANCE.getConfig();
         if (!this.children.isEmpty()) {
             String usage = config.getInvalidUsageList();
@@ -156,15 +155,19 @@ public class CommandNode {
                 String name = child.getName().split(" ")[0];
                 String subname = child.getName().replaceFirst(name + " ", "");
 
+
                 builder.append(config.getPrimaryColor())
                         .append("/")
                         .append(name)
                         .append(" ")
                         .append(config.getSecondaryColor())
                         .append(subname)
-                        .append(" &r")
-                        .append("todo: show args")
-                        .append("\n");
+                        .append(" &r");
+                for (Parameter parameter : child.getMethod().getParameters()) {
+                    builder.append(this.parseArgAsText(parameter))
+                            .append(" ");
+                }
+                builder.append("\n");
                 i++;
             }
 
@@ -177,9 +180,38 @@ public class CommandNode {
         builder.append("/")
                 .append(this.name)
                 .append(" ");
-        // todo: finish
 
-        return Util.format(String.format(usage, builder.toString()));
+        for (int i = 1; i < this.method.getParameterCount(); i++) {
+            Parameter parameter = this.method.getParameters()[i];
+            builder.append(this.parseArgAsText(parameter))
+                    .append(" ");
+        }
+
+        return Util.format(String.format(usage, builder));
+    }
+
+    private String parseArgAsText(Parameter parameter) {
+        if (parameter.isAnnotationPresent(Arg.class)) {
+            Arg arg = parameter.getAnnotation(Arg.class);
+            String value = arg.value();
+            if (arg.defaultValue().isEmpty()) {
+                return "<" + value + (arg.wildcard() ? "..." : "") + ">";
+            }
+
+            return "[" + value + (arg.wildcard() ? "..." : "") + "]";
+        }
+
+        if (parameter.isAnnotationPresent(Flag.class)) {
+            Flag flag = parameter.getAnnotation(Flag.class);
+            return "[-" + flag.value() + "]";
+        }
+
+        if (parameter.isAnnotationPresent(FlagValue.class)) {
+            FlagValue flagValue = parameter.getAnnotation(FlagValue.class);
+            return "[-" + flagValue.flagName() + " " + (flagValue.defaultValue().isEmpty() ? "<" : "[") + flagValue.argName() + (flagValue.defaultValue().isEmpty() ? ">" : "]") +  "]";
+        }
+
+        return "(ERROR)";
     }
 
     public void execute(CommandSender sender, String[] args) {
@@ -230,7 +262,7 @@ public class CommandNode {
             }
         }
 
-        List<Parameter> parameters = List.of(this.method.getParameters()).subList(1, this.method.getParameters().length);
+        List<Parameter> parameters = Lists.newArrayList(this.method.getParameters()).subList(1, this.method.getParameters().length);
         ArgumentParser parser = new ArgumentParser(sender, this.handler);
 
         Map<Integer, Argument> parsedArgs = parser.parse(args, parameters.toArray(new Parameter[0]));

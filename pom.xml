@@ -45,6 +45,11 @@
             <artifactId>javassist</artifactId>
             <version>3.30.2-GA</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.1.0-jre</version>
+        </dependency>
     </dependencies>
 
 </project>
