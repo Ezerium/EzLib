@@ -26,7 +26,7 @@ public class EzHelpTopic extends HelpTopic {
 
     @Override
     public String getShortText() {
-        return node.getDescription();
+        return node.getDescription().length() > 30 ? node.getDescription().substring(0, 3) + "..." : node.getDescription();
     }
 
 }

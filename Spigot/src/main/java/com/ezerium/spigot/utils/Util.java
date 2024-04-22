@@ -20,7 +20,10 @@ public class Util {
     }
 
     public static String getNMSVersion() {
-        return Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+        String v = Bukkit.getServer().getClass().getPackage().getName();
+        v = v.substring(v.lastIndexOf('.') + 1);
+
+        return v;
     }
 
     public static String getOBCVersion() {
@@ -54,7 +57,7 @@ public class Util {
     @Nullable
     public static Class<?> getOBCClass(String name) {
         try {
-            return Class.forName("org.bukkit.craftbukkit." + getOBCVersion() + "." + name);
+            return Class.forName("org.bukkit.craftbukkit." + getNMSVersion() + "." + name);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return null;

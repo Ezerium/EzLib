@@ -24,6 +24,62 @@ public class DisguiseHandler {
 
     private final List<Disguise> disguises = new ArrayList<>();
 
+    public boolean disguise(@NotNull Player player, @NotNull Player target) {
+        Preconditions.checkNotNull(player, "Player cannot be null.");
+        Preconditions.checkNotNull(target, "Target cannot be null.");
+        if (this.isDisguised(player)) this.clear(player);
+
+        Disguise disguise = new Disguise(player.getUniqueId(), player.getName(), target.getUniqueId(), target.getName());
+        return this.disguise(disguise);
+    }
+
+    public boolean disguise(@NotNull Player player, @NotNull UUID target) {
+        Preconditions.checkNotNull(player, "Player cannot be null.");
+        Preconditions.checkNotNull(target, "Target cannot be null.");
+        if (this.isDisguised(player)) this.clear(player);
+
+        Disguise disguise = new Disguise(player.getUniqueId(), player.getName(), target, Bukkit.getOfflinePlayer(target).getName());
+        return this.disguise(disguise);
+    }
+
+    public boolean disguise(@NotNull Player player, @NotNull String target) {
+        Preconditions.checkNotNull(player, "Player cannot be null.");
+        Preconditions.checkNotNull(target, "Target cannot be null.");
+        UUID targetUUID = PlayerUtils.getUUID(target);
+        if (this.isDisguised(player)) this.clear(player);
+
+        Disguise disguise = new Disguise(player.getUniqueId(), player.getName(), targetUUID, target);
+        return this.disguise(disguise);
+    }
+
+    public boolean disguise(@NotNull UUID player, @NotNull Player target) {
+        Preconditions.checkNotNull(player, "Player cannot be null.");
+        Preconditions.checkNotNull(target, "Target cannot be null.");
+        if (this.isDisguised(player)) this.clear(Bukkit.getPlayer(player));
+
+        Disguise disguise = new Disguise(player, Bukkit.getOfflinePlayer(player).getName(), target.getUniqueId(), target.getName());
+        return this.disguise(disguise);
+    }
+
+    public boolean disguise(@NotNull UUID player, @NotNull UUID target) {
+        Preconditions.checkNotNull(player, "Player cannot be null.");
+        Preconditions.checkNotNull(target, "Target cannot be null.");
+        if (this.isDisguised(player)) this.clear(Bukkit.getPlayer(player));
+
+        Disguise disguise = new Disguise(player, Bukkit.getOfflinePlayer(player).getName(), target, Bukkit.getOfflinePlayer(target).getName());
+        return this.disguise(disguise);
+    }
+
+    public boolean disguise(@NotNull UUID player, @NotNull String target) {
+        Preconditions.checkNotNull(player, "Player cannot be null.");
+        Preconditions.checkNotNull(target, "Target cannot be null.");
+        UUID targetUUID = PlayerUtils.getUUID(target);
+        if (this.isDisguised(player)) this.clear(Bukkit.getPlayer(player));
+
+        Disguise disguise = new Disguise(player, Bukkit.getOfflinePlayer(player).getName(), targetUUID, target);
+        return this.disguise(disguise);
+    }
+
     @SneakyThrows
     public boolean disguise(@NotNull Disguise disguise) {
         Preconditions.checkNotNull(disguise, "Disguise cannot be null.");

@@ -12,4 +12,6 @@ public @interface Command {
     String value();
 
     String[] aliases() default {};
+
+    boolean hidden() default false;
 }

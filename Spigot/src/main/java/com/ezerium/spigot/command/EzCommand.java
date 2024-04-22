@@ -1,7 +1,10 @@
 package com.ezerium.spigot.command;
 
 import com.ezerium.logger.EzLogger;
+import com.ezerium.spigot.Spigot;
+import com.ezerium.spigot.utils.Util;
 import com.google.common.collect.Lists;
+import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -11,11 +14,20 @@ import java.util.stream.Collectors;
 
 public class EzCommand extends Command {
 
+    @Getter
     private final CommandNode node;
 
     public EzCommand(CommandNode node) {
         super(node.getName(), node.getDescription(), node.getUsage(), Lists.newArrayList(node.getAliases()));
         this.node = node;
+
+        if (!node.getPermission().isEmpty()) {
+            this.setPermission(node.getPermission());
+            if (node.isHidden()) {
+                String unknownCommand = Spigot.INSTANCE.getConfig().getUnknownCommand();
+                this.setPermissionMessage(Util.format(unknownCommand));
+            } else this.setPermissionMessage(Util.format(Spigot.INSTANCE.getConfig().getNoPermission()));
+        }
     }
 
     @Override

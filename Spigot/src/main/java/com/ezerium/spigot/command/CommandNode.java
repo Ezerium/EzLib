@@ -20,10 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +41,7 @@ public class CommandNode {
     private final String usage;
 
     private final boolean async;
+    private final boolean hidden;
 
     private final boolean cooldown;
     private final int cooldownTime;
@@ -55,7 +53,7 @@ public class CommandNode {
 
     private final Map<String, CommandNode> children;
 
-    public CommandNode(CommandHandler handler, @Nullable Method method, String name, String[] aliases, @Nullable Description description, @Nullable Permission permission, @Nullable Usage usage, @Nullable Async async, @Nullable Cooldown cooldown, @Nullable CommandNode parent) {
+    public CommandNode(CommandHandler handler, @Nullable Method method, String name, String[] aliases, boolean hidden, @Nullable Description description, @Nullable Permission permission, @Nullable Usage usage, @Nullable Async async, @Nullable Cooldown cooldown, @Nullable CommandNode parent) {
         this.handler = handler;
         this.method = method;
         this.name = name;
@@ -65,6 +63,7 @@ public class CommandNode {
         this.usage = (usage == null || usage.value().isEmpty() ? "" : usage.value());
 
         this.async = async != null;
+        this.hidden = hidden;
 
         this.cooldown = cooldown != null;
         this.cooldownTime = (this.cooldown ? cooldown.value() : 0);
@@ -84,7 +83,7 @@ public class CommandNode {
     }
 
     public boolean hasPermission(CommandSender sender) {
-        if (this.permission == null) return true;
+        if (this.permission.isEmpty()) return true;
         if (!(sender instanceof Player)) return true;
 
         if (!sender.isOp() && this.permission.equals("op")) return false;
@@ -150,11 +149,10 @@ public class CommandNode {
             String usage = config.getInvalidUsageList();
 
             StringBuilder builder = new StringBuilder();
-            int i = 0;
+            int x = 0;
             for (CommandNode child : this.children.values()) {
                 String name = child.getName().split(" ")[0];
                 String subname = child.getName().replaceFirst(name + " ", "");
-
 
                 builder.append(config.getPrimaryColor())
                         .append("/")
@@ -163,12 +161,13 @@ public class CommandNode {
                         .append(config.getSecondaryColor())
                         .append(subname)
                         .append(" &r");
-                for (Parameter parameter : child.getMethod().getParameters()) {
+                for (int i = 1; i < child.getMethod().getParameterCount(); i++) {
+                    Parameter parameter = child.getMethod().getParameters()[i];
                     builder.append(this.parseArgAsText(parameter))
                             .append(" ");
                 }
-                builder.append("\n");
-                i++;
+                if (x < this.children.size() - 1) builder.append("\n");
+                x++;
             }
 
             return Util.format(String.format(usage, builder.toString()));
@@ -238,8 +237,7 @@ public class CommandNode {
 
         CommandNode child = this.foundChild(args);
         if (child != null) {
-            String subCommand = String.join(" ", args);
-            String[] newArgs = subCommand.replaceFirst(child.getName() + " ", "").split(" ");
+            String[] newArgs = Arrays.copyOfRange(args, child.getName().replaceFirst(this.name + " ", "").split(" ").length, args.length);
 
             child.execute(sender, newArgs);
             return;
@@ -295,7 +293,7 @@ public class CommandNode {
 
     private CommandNode foundChild(String[] args) {
         for (int i = args.length; i > 0; i--) {
-            String arg = String.join(" ", args);
+            String arg = String.join(" ", Arrays.copyOfRange(args, 0, i));
             if (this.children.containsKey(arg)) {
                 return this.children.get(arg);
             }

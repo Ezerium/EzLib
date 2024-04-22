@@ -1,6 +1,10 @@
 package com.ezerium.spigot;
 
 import lombok.Data;
+import lombok.SneakyThrows;
+import org.bukkit.Bukkit;
+
+import java.lang.reflect.Field;
 
 @Data
 public class Config {
@@ -15,5 +19,15 @@ public class Config {
     private String invalidUsage = "&cUsage: %s";
     private String invalidUsageList = "&7&m------------------&r\n%s\n&7&m------------------&r";
     private String onCooldown = "&cYou are on cooldown for %s.";
+    private String unknownCommand = getUnknownCommand();
+
+    @SneakyThrows
+    private String getSpigotUnknownCommand() {
+        Class<?> clazz = Class.forName("org.spigotmc.SpigotConfig");
+        Field field = clazz.getDeclaredField("unknownCommandMessage");
+        field.setAccessible(true);
+
+        return (String) field.get(clazz);
+    }
 
 }

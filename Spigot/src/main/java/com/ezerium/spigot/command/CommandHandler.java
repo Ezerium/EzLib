@@ -18,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CommandHandler {
@@ -75,66 +76,61 @@ public class CommandHandler {
 
     public void register(Method method) {
         Command annotation = method.getAnnotation(Command.class);
-        if (annotation.value().split(" ").length > 1) {
-            String command = annotation.value().split(" ")[0];
+        Aliases aliases = method.getAnnotation(Aliases.class);
 
-            CommandNode parent;
-            if (!this.registeredCommands.containsKey(command)) {
-                parent = new CommandNode(
-                        this,
-                        null,
-                        command,
-                        new String[0],
-                        null,
-                        null,
-                        method.getAnnotation(Usage.class),
-                        null,
-                        null,
-                        null
-                );
-
-                this.registeredCommands.put(command, null);
-            } else parent = this.registeredCommands.get(command);
-
-            parent.addChild(new CommandNode(
+        String name = annotation.value();
+        if (!name.contains(" ")) {
+            CommandNode node = new CommandNode(
                     this,
                     method,
-                    annotation.value().replace(command + " ", ""),
-                    method.getAnnotation(Aliases.class) == null ? annotation.aliases() : method.getAnnotation(Aliases.class).value(),
+                    annotation.value(),
+                    aliases == null ? annotation.aliases() : aliases.value(),
+                    annotation.hidden(),
                     method.getAnnotation(Description.class),
                     method.getAnnotation(Permission.class),
                     method.getAnnotation(Usage.class),
                     method.getAnnotation(Async.class),
                     method.getAnnotation(Cooldown.class),
-                    parent
-            ));
+                    null
+            );
 
-            return;
+            this.registeredCommands.put(node.getName(), node);
+
+            EzHelpTopic helpTopic = new EzHelpTopic(node);
+            EzCommand command = new EzCommand(node);
+            this.commandMap.register(Spigot.INSTANCE.getPlugin().getDescription().getName().toLowerCase().replace(" ", "_"), command);
+            Bukkit.getServer().getHelpMap().addTopic(helpTopic);
         }
 
-        Aliases aliases = method.getAnnotation(Aliases.class);
-        CommandNode node = new CommandNode(
-                this,
-                method,
-                annotation.value(),
-                aliases == null ? annotation.aliases() : aliases.value(),
-                method.getAnnotation(Description.class),
-                method.getAnnotation(Permission.class),
-                method.getAnnotation(Usage.class),
-                method.getAnnotation(Async.class),
-                method.getAnnotation(Cooldown.class),
-                null
-        );
-        EzCommand command = new EzCommand(node);
-        EzHelpTopic helpTopic = new EzHelpTopic(node);
+        for (Method child : method.getDeclaringClass().getDeclaredMethods()) {
+            if (child.isAnnotationPresent(Command.class)) {
+                Command childAnnotation = child.getAnnotation(Command.class);
+                String childName = childAnnotation.value();
+                if (!childName.contains(" ")) continue;
+                if (!childName.startsWith(name + " ")) continue;
 
-        EzCommand oldCommand = (EzCommand) this.knownCommands.get(command.getName());
-        if (oldCommand != null) {
-            oldCommand.unregister(this.commandMap);
+                CommandNode parent = this.registeredCommands.getOrDefault(name, null);
+                if (parent == null) continue;
+
+                Aliases childAliases = child.getAnnotation(Aliases.class);
+                CommandNode node = new CommandNode(
+                        this,
+                        child,
+                        childAnnotation.value(),
+                        childAliases == null ? childAnnotation.aliases() : childAliases.value(),
+                        childAnnotation.hidden(),
+                        child.getAnnotation(Description.class),
+                        child.getAnnotation(Permission.class),
+                        child.getAnnotation(Usage.class),
+                        child.getAnnotation(Async.class),
+                        child.getAnnotation(Cooldown.class),
+                        parent
+                );
+
+                parent.addChild(node);
+                this.registeredCommands.put(node.getName(), node);
+            }
         }
-
-        this.commandMap.register(Spigot.INSTANCE.getPlugin().getDescription().getName().toLowerCase().replace(" ", "_"), command);
-        Bukkit.getServer().getHelpMap().addTopic(helpTopic);
     }
 
     private void init() {
