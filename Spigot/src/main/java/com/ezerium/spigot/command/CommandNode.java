@@ -270,7 +270,6 @@ public class CommandNode {
         }
 
         if (parsedArgs.values().stream().anyMatch(arg -> arg.getValue() == null && arg.getType() != ArgumentType.FLAG_VALUE)) {
-            sender.sendMessage(this.getUsageMessage());
             return;
         }
 

@@ -1,11 +1,13 @@
 package com.ezerium.spigot.utils;
 
+import com.google.common.collect.Lists;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 @UtilityClass
@@ -17,6 +19,29 @@ public class Util {
 
     public static String format(String message, Object... args) {
         return String.format(format(message), args);
+    }
+
+    public static String[] format(String[] messages) {
+        for (int i = 0; i < messages.length; i++) {
+            messages[i] = format(messages[i]);
+        }
+        return messages;
+    }
+
+    public static String[] format(String[] messages, Object... args) {
+        for (int i = 0; i < messages.length; i++) {
+            messages[i] = format(messages[i], args);
+        }
+
+        return messages;
+    }
+
+    public static List<String> format(List<String> messages) {
+        return Lists.newArrayList(format(messages.toArray(new String[0])));
+    }
+
+    public static List<String> format(List<String> messages, Object... args) {
+        return Lists.newArrayList(format(messages.toArray(new String[0]), args));
     }
 
     public static String getNMSVersion() {

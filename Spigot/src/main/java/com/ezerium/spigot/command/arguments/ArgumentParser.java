@@ -63,7 +63,14 @@ public class ArgumentParser {
         String value;
         if (args.length == 0 && !arg.defaultValue().isEmpty()) value = arg.defaultValue();
         else if (args.length > 0) value = args[0];
-        else return new String[0];
+        else {
+            Argument argument = new Argument(ArgumentType.ARG, arg.value(), null, null);
+
+            int size = this.args.size();
+            this.args.put(size, argument);
+
+            return new String[0];
+        }
 
         if (value.startsWith("\"")) {
             if (value.endsWith("\"")) value = value.substring(1).substring(0, value.length() - 2);
