@@ -1,11 +1,16 @@
 package com.ezerium.spigot.command.test;
 
 import com.ezerium.annotations.command.*;
+import com.ezerium.spigot.chat.Pagination;
 import com.ezerium.spigot.disguise.Disguise;
 import com.ezerium.spigot.disguise.DisguiseHandler;
 import com.ezerium.spigot.utils.PlayerUtils;
+import com.google.common.collect.Lists;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class TestCommands {
 
@@ -70,6 +75,25 @@ public class TestCommands {
 
         Disguise disguise = new Disguise(PlayerUtils.getUUID(target), target, player.getUniqueId(), player.getName());
         disguiseHandler.disguise(disguise);
+    }
+
+    @Command("pagination")
+    public void pagination(CommandSender sender, @Arg(value = "page", defaultValue = "1") int page) {
+        List<Integer> list = Lists.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 32, 2, 8, 4, 8);
+        new Pagination<Integer>() {
+
+            @Nullable
+            @Override
+            public String getHeader(int page, int maxPage) {
+                return "&7---------------";
+            }
+
+            @Override
+            public String format(Integer num, int page, int maxPage) {
+                return "Number: " + num;
+            }
+
+        }.send(sender, page, list);
     }
 
 }

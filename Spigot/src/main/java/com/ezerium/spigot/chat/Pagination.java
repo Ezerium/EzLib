@@ -1,6 +1,7 @@
 package com.ezerium.spigot.chat;
 
 import com.ezerium.spigot.utils.Util;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,10 +26,14 @@ public abstract class Pagination<T> {
         return null;
     }
 
-    public final void send(Player player, int page, int maxItemsPerPage, List<T> list) {
+    public final void send(CommandSender sender, int page, List<T> list) {
+        this.send(sender, page, 5, list);
+    }
+
+    public final void send(CommandSender sender, int page, int maxItemsPerPage, List<T> list) {
         int maxPage = (int) Math.ceil((double) list.size() / maxItemsPerPage);
         if (page < 1 || page > maxPage) {
-            player.sendMessage(Util.format("&cThe page '&e" + page + "&c' does not exist."));
+            sender.sendMessage(Util.format("&cThe page '&e" + page + "&c' does not exist."));
             return;
         }
 
@@ -37,10 +42,10 @@ public abstract class Pagination<T> {
         String headerFooter = getHeaderFooter(page, maxPage);
 
         if (headerFooter != null) {
-            player.sendMessage(headerFooter);
+            sender.sendMessage(Util.format(headerFooter));
         } else {
             if (header != null) {
-                player.sendMessage(header);
+                sender.sendMessage(Util.format(header));
             }
         }
 
@@ -48,14 +53,14 @@ public abstract class Pagination<T> {
         int toIndex = Math.min(page * maxItemsPerPage, list.size());
 
         for (int i = fromIndex; i < toIndex; i++) {
-            player.sendMessage(format(list.get(i), page, maxPage));
+            sender.sendMessage(format(list.get(i), page, maxPage));
         }
 
         if (headerFooter != null) {
-            player.sendMessage(headerFooter);
+            sender.sendMessage(Util.format(headerFooter));
         } else {
             if (footer != null) {
-                player.sendMessage(footer);
+                sender.sendMessage(Util.format(footer));
             }
         }
     }

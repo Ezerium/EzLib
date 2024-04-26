@@ -2,10 +2,12 @@ package com.ezerium.spigot.command.arguments;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.ToString;
 import org.jetbrains.annotations.Nullable;
 
 @Data
 @AllArgsConstructor
+@ToString
 public class Argument {
 
     private final ArgumentType type;

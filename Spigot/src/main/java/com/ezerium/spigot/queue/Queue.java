@@ -49,6 +49,10 @@ public class Queue<T> {
         queue.remove(t);
     }
 
+    public void remove() {
+        this.move();
+    }
+
     public boolean isEmpty() {
         return queue.isEmpty();
     }

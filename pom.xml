@@ -50,6 +50,11 @@
             <artifactId>guava</artifactId>
             <version>33.1.0-jre</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
 </project>

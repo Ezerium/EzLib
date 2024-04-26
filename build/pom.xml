@@ -17,4 +17,61 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>**/*.kotlin_metadata</exclude>
+                                        <exclude>**/*.kotlin_module</exclude>
+                                        <exclude>**/*.kotlin_builtins</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <outputFile>${project.build.directory}/${project.artifactId}-${version}-full.jar</outputFile>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ezerium</groupId>
+            <artifactId>Core</artifactId>
+            <version>0.0.1-dev</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ezerium</groupId>
+            <artifactId>Spigot</artifactId>
+            <version>0.0.1-dev</version>
+        </dependency>
+    </dependencies>
+
 </project>

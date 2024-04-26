@@ -1,7 +1,10 @@
 package com.ezerium.spigot.gui;
 
 import com.ezerium.spigot.gui.button.Button;
+import com.ezerium.spigot.gui.button.impl.NextButton;
 import com.google.common.base.Preconditions;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -13,9 +16,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 public abstract class PaginatedMenu extends Menu {
 
-    @Setter
+    public enum Position {
+        TOP,
+        BOTTOM
+    }
+
     private int page;
 
     public PaginatedMenu(int page) {
@@ -35,6 +44,14 @@ public abstract class PaginatedMenu extends Menu {
     abstract public int getItemsPerPage(Player player);
 
     abstract public List<Button> getItems(Player player);
+
+    /**
+     * The position of the next and previous page button.
+     * @return The position, either top or bottom.
+     */
+    public Position getButtonPosition(Player player) {
+        return Position.BOTTOM;
+    }
 
     @Nullable
     public Comparator<? super Button> sortBy(Player player) {
@@ -78,12 +95,22 @@ public abstract class PaginatedMenu extends Menu {
             buttons.put(i - start + 9, item);
         }
 
+        int size = getSize(player);
+        Position position = getButtonPosition(player);
+        if (page > 1) {
+            buttons.put((position == Position.BOTTOM ? size - 9 - 1 : 0), new NextButton(this));
+        }
+
+        if (((float) items.size() / itemsPerPage) > 1.0F) {
+            buttons.put((position == Position.BOTTOM ? size - 1 : 9), new NextButton(this));
+        }
+
         return buttons;
     }
 
     @Deprecated
     @Override
-    public InventoryType getInventoryType(Player player) {
+    public final InventoryType getInventoryType(Player player) {
         return null;
     }
 }

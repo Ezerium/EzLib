@@ -49,8 +49,10 @@ public class ArgumentParser {
     private String[] parseArgs(Parameter parameter, String[] args) {
         Arg arg = parameter.getAnnotation(Arg.class);
         if (arg.wildcard()) {
-            if (args.length == 0) return new String[0];
-            String value = String.join(" ", args);
+            String value;
+            if (args.length == 0 && !arg.defaultValue().isEmpty()) value = arg.defaultValue();
+            else if (args.length == 0) return new String[0];
+            else value = String.join(" ", args);
 
             Argument argument = new Argument(ArgumentType.ARG, arg.value(), value, null);
 
@@ -185,6 +187,7 @@ public class ArgumentParser {
     }
 
     private String[] shift(String[] array) {
+        if (array.length == 0) return new String[0];
         String[] newArray = new String[array.length - 1];
         System.arraycopy(array, 1, newArray, 0, newArray.length);
         return newArray;

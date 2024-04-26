@@ -30,7 +30,7 @@ public final class Main {
         //System.out.println(CacheUtils.cache);
     }
 
-    @Debug(logOnCall = "test {abc}", debugAt = DebugAt.AUTO)
+    //@Debug(logOnCall = "test {abc}", debugAt = DebugAt.AUTO)
     @GeneratedTest
     public void test() {
         String abc = "abc";
