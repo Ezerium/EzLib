@@ -65,11 +65,6 @@ public abstract class Menu {
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
-                if (inventory == null || !player.getOpenInventory().getTopInventory().equals(inventory)) {
-                    cancel();
-                    return;
-                }
-
                 if (!OPENED_MENUS.containsKey(player.getUniqueId())) {
                     cancel();
                 }
@@ -82,9 +77,10 @@ public abstract class Menu {
             }
         };
 
-        this.task = runnable.runTaskTimerAsynchronously(Spigot.INSTANCE.getPlugin(), 0L, updateTicks);
-        if (!update) {
-            task.cancel();
+        if (update) {
+            this.task = runnable.runTaskTimerAsynchronously(Spigot.INSTANCE.getPlugin(), 0L, updateTicks);
+        } else {
+            runnable.run();
         }
 
         player.openInventory(inventory);

@@ -4,6 +4,7 @@ import com.ezerium.annotations.command.*;
 import com.ezerium.spigot.chat.Pagination;
 import com.ezerium.spigot.disguise.Disguise;
 import com.ezerium.spigot.disguise.DisguiseHandler;
+import com.ezerium.spigot.gui.test.TestMenu;
 import com.ezerium.spigot.utils.PlayerUtils;
 import com.google.common.collect.Lists;
 import org.bukkit.command.CommandSender;
@@ -94,6 +95,11 @@ public class TestCommands {
             }
 
         }.send(sender, page, list);
+    }
+
+    @Command("gui")
+    public void gui(Player player) {
+        new TestMenu().open(player);
     }
 
 }
