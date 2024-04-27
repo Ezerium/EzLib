@@ -19,6 +19,10 @@ public class ActionBar {
     private String message;
     private boolean stay;
 
+    public ActionBar(String message) {
+        this(message, false);
+    }
+
     public final void send(Player player) {
         Preconditions.checkNotNull(player, "Player cannot be null.");
         Preconditions.checkNotNull(message, "Message cannot be null.");

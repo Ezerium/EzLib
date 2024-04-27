@@ -1,6 +1,8 @@
 package com.ezerium.spigot.command.test;
 
 import com.ezerium.annotations.command.*;
+import com.ezerium.spigot.actionbar.ActionBar;
+import com.ezerium.spigot.chat.ChatInput;
 import com.ezerium.spigot.chat.Pagination;
 import com.ezerium.spigot.disguise.Disguise;
 import com.ezerium.spigot.disguise.DisguiseHandler;
@@ -100,6 +102,22 @@ public class TestCommands {
     @Command("gui")
     public void gui(Player player) {
         new TestMenu().open(player);
+    }
+
+    @Command("actionbar")
+    public void actionbar(Player player, @Arg("message") String message) {
+        ActionBar actionBar = new ActionBar(message);
+        actionBar.send(player);
+    }
+
+    @Command("chat")
+    public void chat(Player sender, @Arg("message") String message) {
+        sender.sendMessage(message);
+        ChatInput chatInput = new ChatInput((s) -> {
+            sender.sendMessage("Message: " + s);
+        });
+
+        chatInput.send(sender);
     }
 
 }

@@ -34,10 +34,11 @@ public class Scoreboard {
         this.updateInterval = updateInterval;
 
         Class<?> iScoreboardCriteria = Util.getNMSClass("IScoreboardCriteria");
+        Class<?> scoreboardClass = Util.getNMSClass("Scoreboard");
 
-        this.scoreboard = Util.getNMSClass("Scoreboard").getDeclaredConstructor().newInstance();
-        this.objective = Util.getNMSClass("ScoreboardObjective").getDeclaredConstructor(String.class, iScoreboardCriteria)
-                .newInstance("dummy", iScoreboardCriteria.getDeclaredField("b").get(null));
+        this.scoreboard = scoreboardClass.getDeclaredConstructor().newInstance();
+        this.objective = Util.getNMSClass("ScoreboardObjective").getDeclaredConstructor(scoreboardClass, String.class, iScoreboardCriteria)
+                .newInstance(scoreboard, "dummy", iScoreboardCriteria.getDeclaredField("b").get(null));
 
         this.objective.getClass().getDeclaredMethod("setDisplayName", String.class).invoke(this.objective, title);
     }
@@ -71,6 +72,9 @@ public class Scoreboard {
         Object packetScoreboardObjective = packetScoreboardObjectiveClass.getDeclaredConstructor(this.objective.getClass(), int.class).newInstance(this.objective, 0);
         Object packetScoreboardDisplayObjective = packetScoreboardDisplayObjectiveClass.getDeclaredConstructor(int.class, this.objective.getClass()).newInstance(1, this.objective);
 
+        Object removePacket = packetScoreboardObjectiveClass.getDeclaredConstructor(this.objective.getClass(), int.class).newInstance(this.objective, 1);
+
+        Util.sendPacket(player, removePacket);
         Util.sendPacket(player, packetScoreboardObjective);
         Util.sendPacket(player, packetScoreboardDisplayObjective);
 
@@ -92,11 +96,6 @@ public class Scoreboard {
         return this;
     }
 
-    public Scoreboard removeLine(String line) {
-        lines.removeIf(l -> l.getText().equals(line));
-        return this;
-    }
-
     public Scoreboard setLine(int index, ScoreboardLine line) {
         lines.set(index, line);
         return this;
@@ -114,11 +113,6 @@ public class Scoreboard {
 
     @SneakyThrows
     private void update(Player player) {
-        Class<?> outScoreboardObjectiveClass = Util.getNMSClass("PacketPlayOutScoreboardObjective");
-        Object removePacket = outScoreboardObjectiveClass.getDeclaredConstructor(this.objective.getClass(), int.class).newInstance(this.objective, 1);
-
-        Util.sendPacket(player, removePacket);
-
         int i = lines.size() - 1;
         for (ScoreboardLine line : lines) {
             if (!line.isAutoUpdate()) continue;
@@ -132,10 +126,10 @@ public class Scoreboard {
         if (index < 0 || index >= lines.size()) return;
 
         ScoreboardLine line = lines.get(index);
-        String text = line.getText();
+        String text = line.getText().apply(player);
         int score = lines.size() - index;
 
-        Class<?> scoreboardScore = Util.getNMSClass("scoreboardScore");
+        Class<?> scoreboardScore = Util.getNMSClass("ScoreboardScore");
         Object sbScore = scoreboardScore.getDeclaredConstructor(this.scoreboard.getClass(), this.objective.getClass(),
                 String.class).newInstance(this.scoreboard, this.objective, text);
 
@@ -144,6 +138,6 @@ public class Scoreboard {
         Class<?> packetScoreboardScoreClass = Util.getNMSClass("PacketPlayOutScoreboardScore");
         Object packetScoreboardScore = packetScoreboardScoreClass.getDeclaredConstructor(scoreboardScore).newInstance(sbScore);
 
-        Util.sendPacket(player, packetScoreboardScoreClass);
+        Util.sendPacket(player, packetScoreboardScore);
     }
 }

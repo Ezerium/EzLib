@@ -91,10 +91,8 @@ public class Util {
 
     public static void sendPacket(Player player, Object packet) {
         try {
-            Class<?> craftPlayerClass = getOBCClass("entity.CraftPlayer");
-            Object craftPlayer = craftPlayerClass.cast(player);
-            Object handle = craftPlayerClass.getDeclaredMethod("getHandle").invoke(craftPlayer);
-            Object playerConnection = handle.getClass().getField("playerConnection").get(handle);
+            Object nmsPlayer = player.getClass().getMethod("getHandle").invoke(player);
+            Object playerConnection = nmsPlayer.getClass().getField("playerConnection").get(nmsPlayer);
             playerConnection.getClass().getMethod("sendPacket", getNMSClass("Packet")).invoke(playerConnection, packet);
         } catch (Exception e) {
             e.printStackTrace();
