@@ -15,11 +15,11 @@ import java.util.UUID;
 @UtilityClass
 public class PlayerUtils {
 
-    @SneakyThrows
     public static JsonObject getProfileSigned(UUID uuid) {
         String uuidString = uuid.toString().replace("-", "");
 
-        try (InputStream is = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuidString + "?unsigned=false").openStream()) {
+        try {
+            InputStream is = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuidString + "?unsigned=false").openStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String jsonText = readAll(rd);
 
@@ -27,13 +27,15 @@ public class PlayerUtils {
             if (element == null || element.isJsonNull()) return null;
 
             return (JsonObject) element;
+        } catch (Exception e) {
+            return null;
         }
     }
 
-    @SneakyThrows
     public static UUID getUUID(String name) {
 
-        try (InputStream is = new URL("https://api.mojang.com/users/profiles/minecraft/" + name).openStream()) {
+        try {
+            InputStream is = new URL("https://api.mojang.com/users/profiles/minecraft/" + name).openStream();
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String jsonText = readAll(rd);
 
@@ -45,6 +47,8 @@ public class PlayerUtils {
                     uuidString.substring(0, 8) + "-" + uuidString.substring(8, 12) + "-"
                             + uuidString.substring(12, 16) + "-" + uuidString.substring(16, 20) + "-" + uuidString.substring(20)
             );
+        } catch (Exception e) {
+            return null;
         }
     }
 

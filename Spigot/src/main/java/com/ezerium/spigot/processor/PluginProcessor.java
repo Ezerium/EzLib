@@ -2,6 +2,7 @@ package com.ezerium.spigot.processor;
 
 import com.ezerium.spigot.annotations.Plugin;
 import com.google.auto.service.AutoService;
+import com.google.common.collect.Lists;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -14,6 +15,7 @@ import javax.tools.StandardLocation;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.List;
 import java.util.Set;
 
 @SupportedAnnotationTypes("com.ezerium.spigot.annotations.Plugin")
@@ -90,6 +92,9 @@ public class PluginProcessor extends AbstractProcessor {
     }
 
     private StringBuilder generateInformation(Plugin plugin, String mainClassName) {
+        List<String> depend = Lists.newArrayList(plugin.depend());
+        depend.add("ProtocolLib");
+
         StringBuilder builder = new StringBuilder()
                 .append("name: ").append(plugin.name()).append("\n")
                 .append("version: ").append(plugin.version()).append("\n")
@@ -100,7 +105,7 @@ public class PluginProcessor extends AbstractProcessor {
             if (plugin.authors().length == 1) builder.append("author: ").append(plugin.authors()[0]).append("\n");
             else builder.append("authors: [").append(String.join(", ", plugin.authors())).append("]\n");
         }
-        if (plugin.depend().length > 0) builder.append("depend: [").append(String.join(", ", plugin.depend())).append("]\n");
+        if (plugin.depend().length > 0) builder.append("depend: [").append(String.join(", ", depend)).append("]\n");
         if (plugin.softDepend().length > 0) builder.append("soft-depend: [").append(String.join(", ", plugin.softDepend())).append("]\n");
         if (plugin.loadBefore().length > 0) builder.append("load-before: [").append(String.join(", ", plugin.loadBefore())).append("]\n");
         if (plugin.loadAfter().length > 0) builder.append("load-after: [").append(String.join(", ", plugin.loadAfter())).append("]\n");

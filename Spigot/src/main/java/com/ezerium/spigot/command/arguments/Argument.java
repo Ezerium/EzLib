@@ -16,5 +16,14 @@ public class Argument {
     private final Object value;
 
     private final String flagName;
+    private final boolean a;
+
+    public Argument(ArgumentType type, String name, @Nullable Object value, String flagName) {
+        this.type = type;
+        this.name = name;
+        this.value = value;
+        this.flagName = flagName;
+        this.a = false;
+    }
 
 }

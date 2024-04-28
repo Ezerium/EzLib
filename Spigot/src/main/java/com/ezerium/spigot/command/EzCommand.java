@@ -37,7 +37,7 @@ public class EzCommand extends Command {
                 try {
                     node.execute(sender, args);
                 } catch (Exception e) {
-                    EzLogger.logError("An error occurred while executing command " + node.getName() + " for " + sender.getName() + ": " + e.getMessage(), e);
+                    EzLogger.logError("An error occurred while executing command '" + node.getName() + "' for " + sender.getName() + ": " + e.getMessage(), e);
                     sender.sendMessage("An error occurred while executing this command.");
                     if (e.getCause() != null) {
                         sender.sendMessage("Cause: " + e.getCause().getMessage());
@@ -48,7 +48,7 @@ public class EzCommand extends Command {
             try {
                 node.execute(sender, args);
             } catch (Exception e) {
-                EzLogger.logError("An error occurred while executing command " + node.getName() + " for " + sender.getName() + ": " + e.getMessage(), e);
+                EzLogger.logError("An error occurred while executing command '" + node.getName() + "' for " + sender.getName() + ": " + e.getMessage(), e);
                 sender.sendMessage("An error occurred while executing this command.");
                 if (e.getCause() != null) {
                     sender.sendMessage("Cause: " + e.getCause().getMessage());

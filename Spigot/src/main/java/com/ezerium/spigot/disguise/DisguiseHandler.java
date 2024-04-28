@@ -46,6 +46,7 @@ public class DisguiseHandler {
         Preconditions.checkNotNull(player, "Player cannot be null.");
         Preconditions.checkNotNull(target, "Target cannot be null.");
         UUID targetUUID = PlayerUtils.getUUID(target);
+        if (targetUUID == null) return false;
         if (this.isDisguised(player)) this.clear(player);
 
         Disguise disguise = new Disguise(player.getUniqueId(), player.getName(), targetUUID, target);
@@ -74,6 +75,7 @@ public class DisguiseHandler {
         Preconditions.checkNotNull(player, "Player cannot be null.");
         Preconditions.checkNotNull(target, "Target cannot be null.");
         UUID targetUUID = PlayerUtils.getUUID(target);
+        if (targetUUID == null) return false;
         if (this.isDisguised(player)) this.clear(Bukkit.getPlayer(player));
 
         Disguise disguise = new Disguise(player, Bukkit.getOfflinePlayer(player).getName(), targetUUID, target);

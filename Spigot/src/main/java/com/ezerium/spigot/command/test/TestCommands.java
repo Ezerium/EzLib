@@ -7,6 +7,8 @@ import com.ezerium.spigot.chat.Pagination;
 import com.ezerium.spigot.disguise.Disguise;
 import com.ezerium.spigot.disguise.DisguiseHandler;
 import com.ezerium.spigot.gui.test.TestMenu;
+import com.ezerium.spigot.hologram.Hologram;
+import com.ezerium.spigot.npc.EzNPC;
 import com.ezerium.spigot.utils.PlayerUtils;
 import com.google.common.collect.Lists;
 import org.bukkit.command.CommandSender;
@@ -118,6 +120,28 @@ public class TestCommands {
         });
 
         chatInput.send(sender);
+    }
+
+    @Command("npc")
+    public void npc(Player player, @Arg("name") String name) {
+        EzNPC npc = new EzNPC(name, () -> {
+            List<String> lines = Lists.newArrayList();
+            lines.add("Line 1");
+            lines.add("Line 2");
+            lines.add("Line 3");
+            return lines;
+        }, player.getLocation() , (p, a) -> {
+            p.sendMessage("NPC clicked.");
+            p.sendMessage("Action: " + a);
+        });
+        npc.spawn();
+    }
+
+    @Command("hologram")
+    public void hologram(Player player, @Arg("id") String id, @Arg("lines") String lines) {
+        String[] l = lines.split(",");
+        Hologram hologram = new Hologram(id, () -> Lists.newArrayList(l), player.getLocation());
+        hologram.spawn();
     }
 
 }

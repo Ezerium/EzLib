@@ -66,7 +66,7 @@ public class ArgumentParser {
         if (args.length == 0 && !arg.defaultValue().isEmpty()) value = arg.defaultValue();
         else if (args.length > 0) value = args[0];
         else {
-            Argument argument = new Argument(ArgumentType.ARG, arg.value(), null, null);
+            Argument argument = new Argument(ArgumentType.ARG, arg.value(), null, null, true);
 
             int size = this.args.size();
             this.args.put(size, argument);

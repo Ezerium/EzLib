@@ -269,7 +269,11 @@ public class CommandNode {
             return;
         }
 
-        if (parsedArgs.values().stream().anyMatch(arg -> arg.getValue() == null && arg.getType() != ArgumentType.FLAG_VALUE)) {
+        if (parsedArgs.values().stream().anyMatch(arg -> {
+            boolean a = arg.getValue() == null && arg.getType() != ArgumentType.FLAG_VALUE;
+            if (a && arg.isA()) sender.sendMessage(this.getUsageMessage());
+            return a;
+        })) {
             return;
         }
 
