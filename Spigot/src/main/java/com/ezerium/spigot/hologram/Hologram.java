@@ -63,7 +63,7 @@ public class Hologram {
 
         Runnable runnable = this::updateLines;
 
-        this.updateLines();
+        Bukkit.getScheduler().runTaskLater(Spigot.INSTANCE.getPlugin(), runnable, 5L);
         if (this.autoUpdate) {
             this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(Spigot.INSTANCE.getPlugin(), runnable, 20L, 20L);
         }
@@ -95,6 +95,7 @@ public class Hologram {
                 }
             }
 
+
             int i = 0;
             for (ArmorStand armorStand : this.armorStands) {
                 armorStand.setCustomName(lines.get(i));
@@ -104,7 +105,7 @@ public class Hologram {
                 armorStand.setCollidable(false);
                 armorStand.setInvulnerable(true);
 
-                double y = (lines.size() == 1 ? 0.0D : this.maxLinesDepth) + (this.maxLinesDepth * i);
+                double y = -this.maxLinesDepth + (this.maxLinesDepth * i);
                 armorStand.teleport(this.location.clone().add(0.0D, y, 0.0D));
 
                 i++;

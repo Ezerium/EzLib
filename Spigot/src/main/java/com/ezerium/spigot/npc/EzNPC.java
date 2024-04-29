@@ -125,6 +125,7 @@ public class EzNPC {
 
     public final void teleport(Location location) {
         this.location = location;
+        this.hologram.setLocation(location);
         NMSUtil.invokeMethod(this.entityPlayer, "setLocation", location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
     }
 
@@ -157,25 +158,14 @@ public class EzNPC {
     public final void spawn() {
         Preconditions.checkState(!this.spawned, "NPC is already spawned.");
         Preconditions.checkState(!npcs.containsKey(id), "NPC with id " + id + " already exists.");
+        npcs.put(id, this);
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             this.show(player);
         }
 
         this.hologram.spawn();
-
         this.spawned = true;
-        npcs.put(id, this);
-
-        Class<?> outScoreboardTeam = Util.getNMSClass("PacketPlayOutScoreboardTeam");
-        Object packet1 = outScoreboardTeam.getConstructor(TEAM.getClass(), int.class).newInstance(TEAM, 1);
-        Object packet2 = outScoreboardTeam.getConstructor(TEAM.getClass(), int.class).newInstance(TEAM, 0);
-        TypeToken<Collection<String>> type = new TypeToken<Collection<String>>() {};
-        Object packet3 = outScoreboardTeam.getConstructor(TEAM.getClass(), type.getRawType(), int.class).newInstance(TEAM, new ArrayList<String>() {{npcs.values().stream().map(EzNPC::getId).forEach(this::add);}}, 3);
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            NMSUtil.sendPacket(player, packet1);
-            NMSUtil.sendPacket(player, packet2);
-            NMSUtil.sendPacket(player, packet3);
-        }
 
         Bukkit.getPluginManager().callEvent(new NPCSpawnEvent(this));
     }
@@ -204,6 +194,18 @@ public class EzNPC {
         NMSUtil.sendPacket(player, namedEntitySpawn);
         NMSUtil.sendPacket(player, entityHeadRotation);
         Bukkit.getScheduler().runTaskLaterAsynchronously(Spigot.INSTANCE.getPlugin(), () -> NMSUtil.sendPacket(player, playerInfoRemove), 20L);
+
+        Class<?> outScoreboardTeam = Util.getNMSClass("PacketPlayOutScoreboardTeam");
+        Object packet1 = outScoreboardTeam.getConstructor(TEAM.getClass(), int.class).newInstance(TEAM, 1);
+        Object packet2 = outScoreboardTeam.getConstructor(TEAM.getClass(), int.class).newInstance(TEAM, 0);
+        TypeToken<Collection<String>> type = new TypeToken<Collection<String>>() {};
+        Object packet3 = outScoreboardTeam.getConstructor(TEAM.getClass(), type.getRawType(), int.class).newInstance(TEAM, new ArrayList<String>() {{npcs.values().stream().map(EzNPC::getId).forEach((id) -> {
+            if (!contains(id)) add(id);
+        });}}, 3);
+
+        NMSUtil.sendPacket(player, packet1);
+        NMSUtil.sendPacket(player, packet2);
+        NMSUtil.sendPacket(player, packet3);
     }
 
     @SneakyThrows

@@ -1,5 +1,6 @@
 package com.ezerium.spigot;
 
+import com.comphenix.packetwrapper.wrappers.play.serverbound.WrapperPlayClientUseEntity;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -9,7 +10,10 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+import com.ezerium.annotations.Async;
+import com.ezerium.http.HTTPRequest;
 import com.ezerium.inject.InjectHandler;
 import com.ezerium.spigot.chat.ChatInputListener;
 import com.ezerium.spigot.gui.listener.MenuListener;
@@ -20,6 +24,7 @@ import com.ezerium.spigot.npc.NPCAction;
 import com.ezerium.spigot.npc.listener.NPCListener;
 import com.ezerium.spigot.scoreboard.Scoreboard;
 import com.ezerium.spigot.scoreboard.ScoreboardLine;
+import com.ezerium.utils.LoggerUtil;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,6 +38,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class Spigot implements Listener {
 
+    public static final int VERSION_CODE = 1;
+
     public static Spigot INSTANCE;
 
     @Getter
@@ -40,12 +47,36 @@ public final class Spigot implements Listener {
 
     @Getter
     private final Config config;
+    @Getter
+    private final ServerStats serverStats;
 
-    public Spigot(JavaPlugin plugin) {
+    public Spigot(JavaPlugin plugin, boolean versionCheck) {
         this.plugin = plugin;
         this.config = new Config();
+        this.serverStats = new ServerStats(plugin);
+
+        if (versionCheck) {
+            //this.versionCheck();
+        }
 
         this.init();
+    }
+
+    public Spigot(JavaPlugin plugin) {
+        this(plugin, true);
+    }
+
+    @Async
+    private void versionCheck() {
+        HTTPRequest request = new HTTPRequest("https://api.ezerium.com/api/v1/ezlib/version");
+        request.fetch((obj) -> {
+            String version = obj.get("version").getAsString();
+            int versionCode = obj.get("versionCode").getAsInt();
+
+            if (versionCode > VERSION_CODE) {
+                LoggerUtil.warn("A new version of EzLib is available! Version: " + version);
+            }
+        });
     }
 
     /**
@@ -72,22 +103,24 @@ public final class Spigot implements Listener {
         protocolManager.addPacketListener(new PacketAdapter(this.plugin, ListenerPriority.NORMAL, PacketType.Play.Client.USE_ENTITY) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
+                if (event.getPacketType() != PacketType.Play.Client.USE_ENTITY) return;
+
                 PacketContainer packet = event.getPacket();
+                WrapperPlayClientUseEntity useEntity = new WrapperPlayClientUseEntity(packet);
 
                 Player player = event.getPlayer();
-                int entityId = packet.getIntegers().read(0);
+                int entityId = useEntity.getEntityId();
 
                 EzNPC ezNPC = EzNPC.getNpcs().values().stream().filter(npc -> npc.getEntityId() == entityId).findFirst().orElse(null);
                 if (ezNPC != null) {
-                    EnumWrappers.EntityUseAction action = packet.getEntityUseActions().read(0);
-                    boolean isShift = packet.getBooleans().readSafely(0);
+                    WrappedEnumEntityUseAction action = useEntity.getAction();
+                    boolean isShift = player.isSneaking();
 
-
-                    switch (action.compareTo(EnumWrappers.EntityUseAction.INTERACT_AT)) {
-                        case 0:
+                    switch (action.getAction()) {
+                        case INTERACT_AT:
                             ezNPC.getOnInteract().onInteract(player, (isShift ? NPCAction.SHIFT_RIGHT_CLICK : NPCAction.RIGHT_CLICK));
                             break;
-                        case 1:
+                        case ATTACK:
                             ezNPC.getOnInteract().onInteract(player, (isShift ? NPCAction.SHIFT_LEFT_CLICK : NPCAction.LEFT_CLICK));
                             break;
                     }
