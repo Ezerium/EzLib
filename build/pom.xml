@@ -72,6 +72,11 @@
             <artifactId>Spigot</artifactId>
             <version>0.0.1-dev</version>
         </dependency>
+        <dependency>
+            <groupId>com.ezerium</groupId>
+            <artifactId>JDA</artifactId>
+            <version>0.0.1-dev</version>
+        </dependency>
     </dependencies>
 
 </project>

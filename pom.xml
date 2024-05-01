@@ -12,6 +12,7 @@
         <module>Core</module>
         <module>Spigot</module>
         <module>build</module>
+        <module>JDA</module>
     </modules>
 
     <properties>
