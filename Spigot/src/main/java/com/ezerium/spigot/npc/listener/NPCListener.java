@@ -12,7 +12,6 @@ public class NPCListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
 
-
         EzNPC.getNpcs().values().forEach(npc -> {
             if (npc.isSpawned()) {
                 npc.show(player);

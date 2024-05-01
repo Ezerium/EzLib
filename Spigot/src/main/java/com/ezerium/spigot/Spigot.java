@@ -1,6 +1,6 @@
 package com.ezerium.spigot;
 
-import com.comphenix.packetwrapper.wrappers.play.serverbound.WrapperPlayClientUseEntity;
+//import com.comphenix.packetwrapper.wrappers.play.serverbound.WrapperPlayClientUseEntity;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -11,7 +11,6 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
-import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import com.ezerium.annotations.Async;
 import com.ezerium.http.HTTPRequest;
 import com.ezerium.inject.InjectHandler;
@@ -106,17 +105,25 @@ public final class Spigot implements Listener {
                 if (event.getPacketType() != PacketType.Play.Client.USE_ENTITY) return;
 
                 PacketContainer packet = event.getPacket();
-                WrapperPlayClientUseEntity useEntity = new WrapperPlayClientUseEntity(packet);
 
                 Player player = event.getPlayer();
-                int entityId = useEntity.getEntityId();
+                int entityId = packet.getIntegers().read(0);
 
                 EzNPC ezNPC = EzNPC.getNpcs().values().stream().filter(npc -> npc.getEntityId() == entityId).findFirst().orElse(null);
                 if (ezNPC != null) {
-                    WrappedEnumEntityUseAction action = useEntity.getAction();
-                    boolean isShift = player.isSneaking();
+                    EnumWrappers.EntityUseAction action = packet.getEntityUseActions().read(0);
+                    StructureModifier<EnumWrappers.Hand> hands = packet.getHands();
+                    EnumWrappers.Hand hand;
+                    try {
+                        hand = hands.read(0);
+                    } catch (Exception e) {
+                        hand = EnumWrappers.Hand.MAIN_HAND;
+                    }
 
-                    switch (action.getAction()) {
+                    boolean isShift = player.isSneaking();
+                    if (hand == EnumWrappers.Hand.OFF_HAND) return;
+
+                    switch (action) {
                         case INTERACT_AT:
                             ezNPC.getOnInteract().onInteract(player, (isShift ? NPCAction.SHIFT_RIGHT_CLICK : NPCAction.RIGHT_CLICK));
                             break;

@@ -7,6 +7,7 @@ import com.ezerium.spigot.npc.events.NPCSpawnEvent;
 import com.ezerium.spigot.utils.NMSUtil;
 import com.ezerium.spigot.utils.PlayerUtils;
 import com.ezerium.spigot.utils.Util;
+import com.ezerium.utils.LoggerUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
@@ -14,6 +15,7 @@ import com.google.gson.reflect.TypeToken;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import lombok.*;
+import lombok.extern.java.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -30,7 +32,7 @@ public class EzNPC {
 
     @Getter
     private static final Map<String, EzNPC> npcs = new HashMap<>();
-    public static Object TEAM;
+    /*public static Object TEAM;
 
     static {
         try {
@@ -45,10 +47,18 @@ public class EzNPC {
             TEAM.getClass().getMethod("setNameTagVisibility", enumNameTagVisibility).invoke(TEAM, enumNameTagVisibility.getField("NEVER").get(null));
         } catch (Exception e) {
             e.printStackTrace();
+            LoggerUtil.err("Something went wrong while trying to create the NPC team.");
         }
+    }*/
+
+    public static Team TEAM;
+
+    static {
+        TEAM = Bukkit.getScoreboardManager().getMainScoreboard().registerNewTeam("NPCs");
+        TEAM.setNameTagVisibility(NameTagVisibility.NEVER);
     }
 
-    private final String id;
+    private String id;
     private UUID uuid;
     private Callable<List<String>> lines;
 
@@ -154,7 +164,6 @@ public class EzNPC {
         this.setSkin(true);
     }
 
-    @SneakyThrows
     public final void spawn() {
         Preconditions.checkState(!this.spawned, "NPC is already spawned.");
         Preconditions.checkState(!npcs.containsKey(id), "NPC with id " + id + " already exists.");
@@ -164,48 +173,77 @@ public class EzNPC {
             this.show(player);
         }
 
+        TEAM.addEntry(id);
+
         this.hologram.spawn();
         this.spawned = true;
 
         Bukkit.getPluginManager().callEvent(new NPCSpawnEvent(this));
     }
 
-    @SneakyThrows
     public final void show(Player player) {
-        Class<?> packetPlayOutPlayerInfo = Util.getNMSClass("PacketPlayOutPlayerInfo");
-        Class<?> packetPlayOutNamedEntitySpawn = Util.getNMSClass("PacketPlayOutNamedEntitySpawn");
-        Class<?> packetPlayOutEntityHeadRotation = Util.getNMSClass("PacketPlayOutEntityHeadRotation");
-        Class<?> enumPlayerInfoAction = Util.getNMSClass("PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
+        try {
+            Class<?> packetPlayOutPlayerInfo = Util.getNMSClass("PacketPlayOutPlayerInfo");
+            Class<?> packetPlayOutNamedEntitySpawn = Util.getNMSClass("PacketPlayOutNamedEntitySpawn");
+            Class<?> packetPlayOutEntityHeadRotation = Util.getNMSClass("PacketPlayOutEntityHeadRotation");
+            Class<?> enumPlayerInfoAction = Util.getNMSClass("PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
+            Class<?> entityPlayerArray = Class.forName("[Lnet.minecraft.server." + Util.getNMSVersion() + ".EntityPlayer;");
 
-        Object array = Array.newInstance(Util.getNMSClass("EntityPlayer"), 1);
-        Array.set(array, 0, this.entityPlayer);
+            Object array = Array.newInstance(Util.getNMSClass("EntityPlayer"), 1);
+            Array.set(array, 0, this.entityPlayer);
 
-        Object playerInfoAdd = packetPlayOutPlayerInfo.getConstructor(enumPlayerInfoAction, Class.forName("[Lnet.minecraft.server." + Util.getNMSVersion() + ".EntityPlayer;"))
-                .newInstance(enumPlayerInfoAction.getField("ADD_PLAYER").get(null), array);
-        Object namedEntitySpawn = packetPlayOutNamedEntitySpawn.getConstructor(Util.getNMSClass("EntityHuman"))
-                .newInstance(this.entityPlayer);
-        float yaw = (float) this.entityPlayer.getClass().getField("yaw").get(this.entityPlayer);
-        Object entityHeadRotation = packetPlayOutEntityHeadRotation.getConstructor(Util.getNMSClass("Entity"), byte.class)
-                .newInstance(this.entityPlayer, (byte) ((int) yaw * 256.0F / 360.0F));
-        Object playerInfoRemove = packetPlayOutPlayerInfo.getConstructor(enumPlayerInfoAction, Class.forName("[Lnet.minecraft.server." + Util.getNMSVersion() + ".EntityPlayer;"))
-                .newInstance(enumPlayerInfoAction.getField("REMOVE_PLAYER").get(null), array);
+            LoggerUtil.warn("Array: " + array);
 
-        NMSUtil.sendPacket(player, playerInfoAdd);
-        NMSUtil.sendPacket(player, namedEntitySpawn);
-        NMSUtil.sendPacket(player, entityHeadRotation);
-        Bukkit.getScheduler().runTaskLaterAsynchronously(Spigot.INSTANCE.getPlugin(), () -> NMSUtil.sendPacket(player, playerInfoRemove), 20L);
+            Object playerInfoAdd = packetPlayOutPlayerInfo.getConstructor(enumPlayerInfoAction, entityPlayerArray)
+                    .newInstance(enumPlayerInfoAction.getField("ADD_PLAYER").get(null), array);
+            LoggerUtil.warn("PlayerInfoAdd: " + playerInfoAdd);
+            Object namedEntitySpawn = packetPlayOutNamedEntitySpawn.getConstructor(Util.getNMSClass("EntityHuman"))
+                    .newInstance(this.entityPlayer);
+            LoggerUtil.warn("NamedEntitySpawn: " + namedEntitySpawn);
+            float yaw = (float) this.entityPlayer.getClass().getField("yaw").get(this.entityPlayer);
+            LoggerUtil.warn("Yaw: " + yaw);
+            Object entityHeadRotation = packetPlayOutEntityHeadRotation.getConstructor(Util.getNMSClass("Entity"), byte.class)
+                    .newInstance(this.entityPlayer, (byte) ((int) yaw * 256.0F / 360.0F));
+            LoggerUtil.warn("EntityHeadRotation: " + entityHeadRotation);
+            Object playerInfoRemove = packetPlayOutPlayerInfo.getConstructor(enumPlayerInfoAction, entityPlayerArray)
+                    .newInstance(enumPlayerInfoAction.getField("REMOVE_PLAYER").get(null), array);
+            LoggerUtil.warn("PlayerInfoRemove: " + playerInfoRemove);
 
-        Class<?> outScoreboardTeam = Util.getNMSClass("PacketPlayOutScoreboardTeam");
-        Object packet1 = outScoreboardTeam.getConstructor(TEAM.getClass(), int.class).newInstance(TEAM, 1);
-        Object packet2 = outScoreboardTeam.getConstructor(TEAM.getClass(), int.class).newInstance(TEAM, 0);
-        TypeToken<Collection<String>> type = new TypeToken<Collection<String>>() {};
-        Object packet3 = outScoreboardTeam.getConstructor(TEAM.getClass(), type.getRawType(), int.class).newInstance(TEAM, new ArrayList<String>() {{npcs.values().stream().map(EzNPC::getId).forEach((id) -> {
-            if (!contains(id)) add(id);
-        });}}, 3);
+            NMSUtil.sendPacket(player, playerInfoAdd);
+            LoggerUtil.warn("1");
+            NMSUtil.sendPacket(player, namedEntitySpawn);
+            LoggerUtil.warn("2");
+            //NMSUtil.sendPacket(player, entityHeadRotation);
+            LoggerUtil.warn("3");
+            Bukkit.getScheduler().runTaskLaterAsynchronously(Spigot.INSTANCE.getPlugin(), () -> {
+                NMSUtil.sendPacket(player, playerInfoRemove);
+            }, 20L);
 
-        NMSUtil.sendPacket(player, packet1);
-        NMSUtil.sendPacket(player, packet2);
-        NMSUtil.sendPacket(player, packet3);
+            /*Class<?> outScoreboardTeam = Util.getNMSClass("PacketPlayOutScoreboardTeam");
+            Object packet1 = outScoreboardTeam.getConstructor(TEAM.getClass(), int.class).newInstance(TEAM, 1);
+            LoggerUtil.warn("Packet1: " + packet1);
+            Object packet2 = outScoreboardTeam.getConstructor(TEAM.getClass(), int.class).newInstance(TEAM, 0);
+            LoggerUtil.warn("Packet2: " + packet2);
+            TypeToken<Collection<String>> type = new TypeToken<Collection<String>>() {};
+            Object packet3 = outScoreboardTeam.getConstructor(TEAM.getClass(), type.getRawType(), int.class).newInstance(TEAM, new ArrayList<String>() {{
+                npcs.values().stream().map(EzNPC::getId).forEach((id) -> {
+                    if (!contains(id)) add(id);
+                });
+                LoggerUtil.warn(this);
+            }}, 3);
+            LoggerUtil.warn("Packet3: " + packet3);
+
+            NMSUtil.sendPacket(player, packet1);
+            LoggerUtil.warn("5");
+            NMSUtil.sendPacket(player, packet2);
+            LoggerUtil.warn("6");
+            NMSUtil.sendPacket(player, packet3);
+            LoggerUtil.warn("7");*/
+        } catch (Exception e) {
+            LoggerUtil.err("Something went wrong while trying to show NPC '" + this.id + "' to player '" + player.getName() + "'.");
+            LoggerUtil.err("Caused by: " + e.getCause().toString());
+            e.printStackTrace();
+        }
     }
 
     @SneakyThrows

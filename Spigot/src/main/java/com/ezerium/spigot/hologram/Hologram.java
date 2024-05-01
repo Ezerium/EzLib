@@ -1,6 +1,7 @@
 package com.ezerium.spigot.hologram;
 
 import com.ezerium.spigot.Spigot;
+import com.ezerium.utils.LoggerUtil;
 import com.google.common.base.Preconditions;
 import lombok.*;
 import org.bukkit.Bukkit;
@@ -58,18 +59,32 @@ public class Hologram {
     }
 
     public final void spawn() {
-        Preconditions.checkState(!holograms.containsKey(this.id), "Hologram with id '" + this.id + "' already exists.");
-        if (this.spawned) return;
+        try {
+            if (this.spawned) return;
+            Preconditions.checkState(!holograms.containsKey(this.id), "Hologram with id '" + this.id + "' already exists.");
 
-        Runnable runnable = this::updateLines;
+            List<String> lines = this.lines.call();
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                if (line == null) line = "&r ";
 
-        Bukkit.getScheduler().runTaskLater(Spigot.INSTANCE.getPlugin(), runnable, 5L);
-        if (this.autoUpdate) {
-            this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(Spigot.INSTANCE.getPlugin(), runnable, 20L, 20L);
+                ArmorStand armorStand = this.location.getWorld().spawn(this.location, ArmorStand.class);
+                this.armorStands.add(armorStand);
+            }
+
+            Runnable runnable = this::updateLines;
+
+            Bukkit.getScheduler().runTaskLater(Spigot.INSTANCE.getPlugin(), runnable, 5L);
+            if (this.autoUpdate) {
+                this.task = Bukkit.getScheduler().runTaskTimerAsynchronously(Spigot.INSTANCE.getPlugin(), runnable, 20L, 20L);
+            }
+
+            holograms.put(this.id, this);
+            this.spawned = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            LoggerUtil.err("Something went wrong while trying to spawn hologram '" + this.id + "'.");
         }
-
-        holograms.put(this.id, this);
-        this.spawned = true;
     }
 
     public final void setLocation(Location location) {
@@ -83,18 +98,6 @@ public class Hologram {
         try {
             List<String> lines = this.lines.call();
             if (lines == null) return;
-
-            for (int i = 0; i < lines.size(); i++) {
-                String line = lines.get(i);
-                if (line == null) continue;
-
-                ArmorStand armorStand;
-                if (this.armorStands.size() <= i) {
-                    armorStand = this.location.getWorld().spawn(this.location, ArmorStand.class);
-                    this.armorStands.add(armorStand);
-                }
-            }
-
 
             int i = 0;
             for (ArmorStand armorStand : this.armorStands) {
