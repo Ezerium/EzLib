@@ -1,6 +1,13 @@
 package com.ezerium.spigot.npc;
 
-import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.packetwrapper.WrapperPlayServerNamedEntitySpawn;
+import com.comphenix.packetwrapper.WrapperPlayServerPlayerInfo;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLib;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.*;
 import com.ezerium.spigot.Spigot;
 import com.ezerium.spigot.hologram.Hologram;
 import com.ezerium.spigot.npc.events.NPCSpawnEvent;
@@ -17,17 +24,19 @@ import com.mojang.authlib.properties.Property;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-@Data
+@Getter
 public class EzNPC {
 
     @Getter
@@ -54,14 +63,21 @@ public class EzNPC {
     public static Team TEAM;
 
     static {
+        TEAM = Bukkit.getScoreboardManager().getMainScoreboard().getTeam("NPCs");
+        if (TEAM != null) TEAM.unregister();
         TEAM = Bukkit.getScoreboardManager().getMainScoreboard().registerNewTeam("NPCs");
-        TEAM.setNameTagVisibility(NameTagVisibility.NEVER);
+        TEAM.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+        TEAM.setColor(ChatColor.GRAY);
+        TEAM.setPrefix(ChatColor.GRAY + "[NPC] ");
     }
 
-    private String id;
+    private final String id;
+    @Setter
     private UUID uuid;
+    @Setter
     private Callable<List<String>> lines;
 
+    @Setter
     private Location location;
     private boolean spawned;
     private boolean autoUpdate;
@@ -70,9 +86,12 @@ public class EzNPC {
     private GameProfile profile;
     private Object entityPlayer;
     private int entityId;
+    @Setter
     private String texture;
+    @Setter
     private String signature;
 
+    @Setter
     private NPCInteract onInteract;
 
     public EzNPC(String id, UUID uuid, Callable<List<String>> lines, Location location, NPCInteract onInteract, boolean spawned, String texture, String signature) {
@@ -181,8 +200,9 @@ public class EzNPC {
         Bukkit.getPluginManager().callEvent(new NPCSpawnEvent(this));
     }
 
+    @SneakyThrows
     public final void show(Player player) {
-        try {
+        /*try {
             Class<?> packetPlayOutPlayerInfo = Util.getNMSClass("PacketPlayOutPlayerInfo");
             Class<?> packetPlayOutNamedEntitySpawn = Util.getNMSClass("PacketPlayOutNamedEntitySpawn");
             Class<?> packetPlayOutEntityHeadRotation = Util.getNMSClass("PacketPlayOutEntityHeadRotation");
@@ -238,23 +258,83 @@ public class EzNPC {
             NMSUtil.sendPacket(player, packet2);
             LoggerUtil.warn("6");
             NMSUtil.sendPacket(player, packet3);
-            LoggerUtil.warn("7");*/
+            LoggerUtil.warn("7");* /
         } catch (Exception e) {
             LoggerUtil.err("Something went wrong while trying to show NPC '" + this.id + "' to player '" + player.getName() + "'.");
             LoggerUtil.err("Caused by: " + e.getCause().toString());
             e.printStackTrace();
-        }
+        }*/
+
+        PacketContainer spawn = new PacketContainer(PacketType.Play.Server.NAMED_ENTITY_SPAWN);
+        PacketContainer preSpawn = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
+        PacketContainer removePacket = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
+
+        WrapperPlayServerNamedEntitySpawn body = new WrapperPlayServerNamedEntitySpawn(spawn);
+
+        int entityId = (int) this.entityPlayer.getClass().getMethod("getId").invoke(this.entityPlayer);
+        body.setEntityID(entityId);
+
+        body.setPosition(location.getDirection());
+        body.setPlayerUUID(uuid);
+        body.setPitch(location.getPitch());
+
+        body.setX(location.getX());
+        body.setY(location.getY());
+        body.setZ(location.getZ());
+
+        WrapperPlayServerPlayerInfo preBody = new WrapperPlayServerPlayerInfo(preSpawn);
+        preBody.setAction(EnumWrappers.PlayerInfoAction.ADD_PLAYER);
+
+        WrappedGameProfile profile = getWrappedProfile();
+        PlayerInfoData data = new PlayerInfoData(profile, 10, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(this.id));
+
+        ArrayList<PlayerInfoData> dataList = new ArrayList<>();
+        dataList.add(data);
+        WrappedDataWatcher.Serializer toFloat = WrappedDataWatcher.Registry.get(Float.class);
+
+        preBody.setData(dataList);
+
+        WrappedDataWatcher watcher = new WrappedDataWatcher();
+        WrappedDataWatcher.WrappedDataWatcherObject object = new WrappedDataWatcher.WrappedDataWatcherObject(7, toFloat);
+        watcher.setObject(object, 20F);
+
+        body.setMetadata(watcher);
+
+        ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+        manager.sendServerPacket(player, preSpawn);
+        manager.sendServerPacket(player, spawn);
+    }
+
+    @SneakyThrows
+    public final void hide(Player player) {
+        PacketContainer removePacket = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
+        WrapperPlayServerPlayerInfo remove = new WrapperPlayServerPlayerInfo(removePacket);
+        remove.setAction(EnumWrappers.PlayerInfoAction.REMOVE_PLAYER);
+
+        WrappedGameProfile profile = getWrappedProfile();
+        PlayerInfoData data = new PlayerInfoData(profile, 10, EnumWrappers.NativeGameMode.CREATIVE, WrappedChatComponent.fromText(this.id));
+
+        ArrayList<PlayerInfoData> dataList = new ArrayList<>();
+        dataList.add(data);
+
+        remove.setData(dataList);
+
+        ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+        manager.sendServerPacket(player, removePacket);
+    }
+
+    private WrappedGameProfile getWrappedProfile() {
+        WrappedGameProfile profile = new WrappedGameProfile(this.uuid, this.id);
+        profile.getProperties().put("textures", new WrappedSignedProperty("textures", this.texture, this.signature));
+        return profile;
     }
 
     @SneakyThrows
     public final void despawn() {
         this.spawned = false;
 
-        Class<?> packetPlayOutEntityDestroy = Util.getNMSClass("PacketPlayOutEntityDestroy");
-        Object packet = packetPlayOutEntityDestroy.getConstructor(int[].class).newInstance(new int[]{(int) this.entityPlayer.getClass().getMethod("getId").invoke(this.entityPlayer)});
-
         for (Player player : Bukkit.getOnlinePlayers()) {
-            NMSUtil.sendPacket(player, packet);
+            this.hide(player);
         }
 
         this.hologram.despawn();

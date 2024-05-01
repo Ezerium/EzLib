@@ -120,6 +120,10 @@
 
     <repositories>
         <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
+        </repository>
+        <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
@@ -131,14 +135,10 @@
             <id>minecraft-repo</id>
             <url>https://libraries.minecraft.net/</url>
         </repository>
-        <repository>
-            <id>dmulloy2-repo</id>
-            <url>https://repo.dmulloy2.net/repository/public/</url>
-        </repository>
-        <repository>
+        <!--<repository>
             <id>lukasalt-repo</id>
             <url>https://repo.lukasa.lt/repository/maven-public/</url>
-        </repository>
+        </repository>-->
     </repositories>
 
     <dependencies>
@@ -160,10 +160,20 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.mojang</groupId>
+            <artifactId>brigadier</artifactId>
+            <version>1.0.18</version>
+        </dependency>
+        <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>5.1.0</version>
+            <version>4.8.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-buffer</artifactId>
+            <version>4.1.96.Final</version>
         </dependency>
         <!--<dependency>
             <groupId>com.comphenix.packetwrapper</groupId>
