@@ -29,6 +29,8 @@ public class MongoDB implements IDatabase {
     private final String password;
     private final String database;
 
+    private boolean retryWrites = true;
+    private boolean autoReconnect = true;
     private String w = "majority";
 
     private final Map<String, MongoCollection<Document>> collections = new HashMap<>();
@@ -60,7 +62,7 @@ public class MongoDB implements IDatabase {
     @NotNull
     @Override
     public String getURI() {
-        return "mongodb" + (host.split(":").length > 1 ? "+srv" : "") + "://" + this.host + "@" + username + ":" + password + "/" + this.database;
+        return "mongodb" + (host.split(":").length > 1 ? "+srv" : "") + "://" + this.username + ":" + this.password + "@" + this.host + "/" + this.database + "?w=" + this.w + "&retryWrites=" + this.retryWrites + "&autoReconnect=" + this.autoReconnect;
     }
 
     public MongoDB addCollection(String name) {
