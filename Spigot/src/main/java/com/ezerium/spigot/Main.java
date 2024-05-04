@@ -9,7 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * The main class of the Spigot module.
  * Testing purposes only.
  */
-@Plugin(name = "EzLib", version = "1.0.0", authors = { "grcq", "IDuckz_" }, description = "A Java library.")
+//@Plugin(name = "EzLib", version = "1.0.0", authors = { "grcq", "IDuckz_" }, description = "A Java library.")
 public class Main extends JavaPlugin {
 
     private Spigot spigot;
