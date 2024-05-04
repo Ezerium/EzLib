@@ -2,12 +2,14 @@ package com.ezerium.jda.listener;
 
 import com.ezerium.jda.EzBot;
 import com.ezerium.jda.annotations.Listener;
+import com.google.common.collect.Lists;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class BotEventListener implements EventListener {
 
@@ -16,7 +18,9 @@ public class BotEventListener implements EventListener {
         EzBot bot = EzBot.INSTANCE;
         if (bot == null) return;
 
-        for (EzListener listener : bot.getListeners()) {
+        List<EzListener> listeners = Lists.newArrayList(bot.getListeners());
+        listeners.add(new CommandListener());
+        for (EzListener listener : listeners) {
             listen(listener, genericEvent);
         }
     }

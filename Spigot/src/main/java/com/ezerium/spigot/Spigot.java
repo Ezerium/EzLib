@@ -15,6 +15,7 @@ import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedEnumEntityUseAction;
+import com.ezerium.VersionChecker;
 import com.ezerium.annotations.Async;
 import com.ezerium.http.HTTPRequest;
 import com.ezerium.inject.InjectHandler;
@@ -43,8 +44,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class Spigot implements Listener {
 
-    public static final int VERSION_CODE = 1;
-
     public static Spigot INSTANCE;
 
     @Getter
@@ -61,7 +60,7 @@ public final class Spigot implements Listener {
         this.serverStats = new ServerStats(plugin);
 
         if (versionCheck) {
-            //this.versionCheck();
+            new VersionChecker().versionCheck();
         }
 
         this.init();
@@ -69,19 +68,6 @@ public final class Spigot implements Listener {
 
     public Spigot(JavaPlugin plugin) {
         this(plugin, true);
-    }
-
-    @Async
-    private void versionCheck() {
-        HTTPRequest request = new HTTPRequest("https://api.ezerium.com/api/v1/ezlib/version");
-        request.fetch((obj) -> {
-            String version = obj.get("version").getAsString();
-            int versionCode = obj.get("versionCode").getAsInt();
-
-            if (versionCode > VERSION_CODE) {
-                LoggerUtil.warn("A new version of EzLib is available! Version: " + version);
-            }
-        });
     }
 
     /**
