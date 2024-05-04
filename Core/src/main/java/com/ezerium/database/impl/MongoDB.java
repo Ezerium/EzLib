@@ -62,7 +62,7 @@ public class MongoDB implements IDatabase {
     @NotNull
     @Override
     public String getURI() {
-        return "mongodb" + (host.split(":").length > 1 ? "+srv" : "") + "://" + this.username + ":" + this.password + "@" + this.host + "/" + this.database + "?w=" + this.w + "&retryWrites=" + this.retryWrites + "&autoReconnect=" + this.autoReconnect;
+        return "mongodb" + (host.split(":").length > 1 ? "" : "+srv") + "://" + this.username + ":" + this.password + "@" + this.host + "/" + this.database + "?w=" + this.w + "&retryWrites=" + this.retryWrites + "&autoReconnect=" + this.autoReconnect;
     }
 
     public MongoDB addCollection(String name) {
