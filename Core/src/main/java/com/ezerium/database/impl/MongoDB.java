@@ -1,18 +1,17 @@
 package com.ezerium.database.impl;
 
 import com.ezerium.database.IDatabase;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -106,7 +105,11 @@ public class MongoDB implements IDatabase {
         return CompletableFuture.runAsync(() -> this.collections.get(collection).deleteMany(filter));
     }
 
-    public Document find(String collection, Document filter) {
+    public FindIterable<Document> find(String collection) {
+        return this.collections.get(collection).find();
+    }
+
+    public Document find(String collection, Bson filter) {
         return this.collections.get(collection).find(filter).first();
     }
 
