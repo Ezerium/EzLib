@@ -6,7 +6,7 @@ import com.ezerium.utils.LoggerUtil;
 
 public class VersionChecker {
 
-    protected static final int VERSION_CODE = 1;
+    protected static final int VERSION_CODE = 2;
 
     @Async
     public void versionCheck() {
