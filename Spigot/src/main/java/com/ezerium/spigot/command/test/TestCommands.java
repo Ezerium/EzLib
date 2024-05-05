@@ -23,7 +23,6 @@ public class TestCommands {
     public void test(CommandSender sender) {
         sender.sendMessage("Test command executed.");
     }
-
     @Command("test2")
     @Aliases("t2")
     public void test2(CommandSender sender, @Arg("arg") String arg) {

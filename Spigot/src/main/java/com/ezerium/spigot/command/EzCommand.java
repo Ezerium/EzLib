@@ -8,6 +8,7 @@ import lombok.Getter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -62,10 +63,12 @@ public class EzCommand extends Command {
 
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        List<String> completions = super.tabComplete(sender, alias, args);
-        completions.addAll(
-                node.tabComplete(sender, args).stream().filter(s -> !completions.contains(s)).collect(Collectors.toList())
-        );
+        List<String> completions = new ArrayList<>();
+        for (String completion : node.tabComplete(sender, args)) {
+            if (!completions.contains(completion)) {
+                completions.add(completion);
+            }
+        }
 
         return completions;
     }

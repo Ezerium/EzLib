@@ -39,6 +39,11 @@ public class MenuListener implements Listener {
         Menu menu = Menu.OPENED_MENUS.get(player.getUniqueId());
         if (menu == null) return;
 
+        BukkitTask task = menu.getTask();
+        if (task != null) {
+            task.cancel();
+        }
+
         menu.remove(player);
     }
 

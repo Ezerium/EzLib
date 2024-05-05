@@ -1,6 +1,7 @@
 package com.ezerium.spigot.gui;
 
 import com.ezerium.spigot.gui.button.Button;
+import com.ezerium.spigot.gui.button.impl.GlassButton;
 import com.ezerium.spigot.gui.button.impl.NextButton;
 import com.google.common.base.Preconditions;
 import lombok.Data;
@@ -67,6 +68,9 @@ public abstract class PaginatedMenu extends Menu {
     public final int getMaxPage(Player player) {
         int itemSize = getItems(player).size();
         int itemsPerPage = getItemsPerPage(player);
+        if (itemSize == 0) {
+            return 1;
+        }
 
         return (int) Math.ceil((double) itemSize / itemsPerPage);
     }
@@ -79,6 +83,10 @@ public abstract class PaginatedMenu extends Menu {
     @Override
     public final Map<Integer, Button> getButtons(Player player) {
         Map<Integer, Button> buttons = new HashMap<>();
+
+        for (int i = 0; i < 9; i++) {
+            buttons.put(i, new GlassButton());
+        }
 
         List<Button> items = getItems(player);
         Comparator<? super Button> comparator = sortBy(player);

@@ -11,6 +11,7 @@ import com.ezerium.spigot.command.arguments.ArgumentParser;
 import com.ezerium.spigot.command.arguments.ArgumentType;
 import com.ezerium.spigot.command.parameters.ParameterType;
 import com.ezerium.spigot.utils.Util;
+import com.ezerium.utils.LoggerUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import org.bukkit.command.CommandSender;
@@ -295,8 +296,12 @@ public class CommandNode {
     }
 
     private CommandNode foundChild(String[] args) {
+        if (args.length == 0) return null;
+
         for (int i = args.length; i > 0; i--) {
             String arg = String.join(" ", Arrays.copyOfRange(args, 0, i));
+            if (arg.isEmpty()) return null;
+
             if (this.children.containsKey(arg)) {
                 return this.children.get(arg);
             }
@@ -312,59 +317,97 @@ public class CommandNode {
             return new ArrayList<>();
         }
 
-        String arg = args[args.length - 1];
-        List<String> completions = new ArrayList<>();
-
-        for (CommandNode child : this.children.values()) {
+        CommandNode child = this.foundChild(args);
+        if (child != null) {
             String[] split = child.getName().split(" ");
-            int index = args.length - 1;
-            if (index + 1 > split.length) continue;
-
-            String subCommand = split[index];
-            completions.add(subCommand);
+            int length = split.length - 1;
+            if (args.length == length) {
+                String[] newArgs = Arrays.copyOfRange(args, child.getName().replaceFirst(this.name + " ", "").split(" ").length, args.length);
+                return child.tabComplete(sender, newArgs);
+            }
         }
 
-        int index = args.length - 1;
-        if (this.method.getParameterCount() - 1 < index) return completions.stream().filter(s -> s.toLowerCase().startsWith(arg.toLowerCase())).collect(Collectors.toList());
+        Method method = this.method;
+        if (child != null) method = child.getMethod();
+        if (method == null) return new ArrayList<>();
 
-        if (index - 1 >= 0) {
-            String prevArg = args[index - 1];
-            if (prevArg.startsWith("-")) {
-                Parameter flagValueParam = null;
-                for (int i = index; i < this.method.getParameters().length; i++) {
-                    Parameter param = this.method.getParameters()[i];
-                    if (param.isAnnotationPresent(FlagValue.class)) {
-                        FlagValue flagValue = param.getAnnotation(FlagValue.class);
-                        if (arg.equals("-" + flagValue.flagName())) {
-                            flagValueParam = param;
-                            break;
+        List<String> completions = new ArrayList<>();
+
+        int length = args.length;
+        String lastArg = args[length - 1];
+
+        mainLoop: for (CommandNode childNode : this.children.values()) {
+            String[] name = childNode.getName().split(" ");
+            name = Arrays.copyOfRange(name, 1, name.length);
+            if (length != name.length) continue;
+
+            for (int i = 0; i < length - 1; i++) {
+                if (!name[i].equalsIgnoreCase(args[i])) {
+                    continue mainLoop;
+                }
+            }
+
+            String childName = name[length - 1];
+            if (childName.toLowerCase().startsWith(lastArg.toLowerCase())) {
+                completions.add(childName);
+            }
+        }
+
+        List<Parameter> parameters = Lists.newArrayList(method.getParameters()).subList(1, method.getParameters().length);
+        if (parameters.isEmpty()) return completions.stream().filter(completion -> completion.toLowerCase().startsWith(lastArg.toLowerCase())).collect(Collectors.toList());
+
+        int index = length - 1;
+        if (length >= 2) {
+            int flagCount = (int) parameters.stream().filter(p -> p.isAnnotationPresent(FlagValue.class)).count();
+            String previousArg = args[length - 2];
+            int flagsDone = (int) Arrays.stream(args).filter(arg -> arg.startsWith("-")).count();
+            if (flagsDone < flagCount && previousArg.startsWith("-")) {
+                Parameter parameter = parameters.get(Arrays.asList(args).indexOf(previousArg));
+                if (parameter.isAnnotationPresent(FlagValue.class)) {
+                    FlagValue flagValue = parameter.getAnnotation(FlagValue.class);
+                    if (flagValue.flagName().equals(previousArg.substring(1))) {
+                        ParameterType<?> type = this.handler.getParameterTypes().get(parameter.getType());
+                        if (type != null) {
+                            return type.tabComplete(sender, lastArg);
                         }
                     }
-                }
 
-                if (flagValueParam != null) {
-                    ParameterType<?> parameterType = this.handler.getParameterTypes().get(flagValueParam.getType());
-                    if (parameterType != null) {
-                        completions.addAll(parameterType.tabComplete(sender, arg));
-                        return completions.stream().filter(s -> s.toLowerCase().startsWith(arg.toLowerCase())).collect(Collectors.toList());
-                    }
                 }
             }
         }
 
-        Parameter parameter = this.method.getParameters()[index];
+        if (index >= parameters.size()) return new ArrayList<>();
+
+        Parameter parameter = parameters.get(length - 1);
         while (parameter.isAnnotationPresent(Flag.class) || parameter.isAnnotationPresent(FlagValue.class)) {
             index++;
-            if (this.method.getParameterCount() - 1 < index) return completions.stream().filter(s -> s.toLowerCase().startsWith(arg.toLowerCase())).collect(Collectors.toList());
-            parameter = this.method.getParameters()[index];
+            if (index >= parameters.size()) return new ArrayList<>();
+
+            parameter = parameters.get(index);
         }
 
-        ParameterType<?> parameterType = this.handler.getParameterTypes().get(parameter.getType());
-        if (parameterType != null) {
-            completions.addAll(parameterType.tabComplete(sender, arg));
-        }
+        ParameterType<?> type = this.handler.getParameterTypes().get(parameter.getType());
+        if (type != null) completions.addAll(type.tabComplete(sender, lastArg));
 
-        return completions.stream().filter(s -> s.toLowerCase().startsWith(arg.toLowerCase())).collect(Collectors.toList());
+        return completions.stream().filter(completion -> completion.toLowerCase().startsWith(lastArg.toLowerCase())).collect(Collectors.toList());
+    }
+
+    @Override
+    public String toString() {
+        return "CommandNode{" +
+                "name='" + name + '\'' +
+                ", aliases=" + Arrays.toString(aliases) +
+                ", description='" + description + '\'' +
+                ", permission='" + permission + '\'' +
+                ", usage='" + usage + '\'' +
+                ", async=" + async +
+                ", hidden=" + hidden +
+                ", cooldown=" + cooldown +
+                ", cooldownTime=" + cooldownTime +
+                ", cooldownBypassPermission='" + cooldownBypassPermission + '\'' +
+                ", method=" + method +
+                ", children=" + children +
+                '}';
     }
 
 }
