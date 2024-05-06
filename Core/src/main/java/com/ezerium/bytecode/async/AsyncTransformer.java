@@ -37,7 +37,7 @@ public class AsyncTransformer extends EzClassTransformer {
             ctClass.addMethod(copy);
 
             if (isVoid(method)) {
-                method.setBody("com.ezerium.utils.javassist.Util.runAsync(\"" + method.getName() + "\", this, $args);");
+                method.setBody("com.ezerium.utils.javassist.Util.runAsync(\"" + method.getName() + "Async\", this, $args);");
             } else {
                 method.setBody("return ($r) com.ezerium.utils.javassist.Util.runAsyncWithReturn(\"" + method.getName() + "\", this, $args);");
             }
