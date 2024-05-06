@@ -174,12 +174,12 @@ public class MQHandler {
         }
     }
 
-    @Async
     public void send(String channel, MQData data) {
         if(!channel.equals(this.channelName)) Preconditions.checkArgument(this.registeredChannels.contains(channel), "Cannot send a message to an unregistered channel.");
         try {
-            data.getData().addProperty("ezIdPacketName", data.getName());
-            this.channel.basicPublish("", channel, null, data.getData().toString().getBytes());
+            JsonObject object = data.getData();
+            object.addProperty("ezIdPacketName", data.getName());
+            this.channel.basicPublish("", channel, null, object.toString().getBytes());
         } catch (IOException e) {
             LoggerUtil.err("An error occurred while sending a message to channel " + channel + ": " + e.getMessage());
             e.printStackTrace();
