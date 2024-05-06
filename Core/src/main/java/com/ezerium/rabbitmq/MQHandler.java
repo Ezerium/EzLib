@@ -163,7 +163,7 @@ public class MQHandler {
     }
 
     public void send(MQData data) {
-        this.send(data, false);
+        this.send(data, true);
     }
 
     public void send(MQData data, boolean sendSelf) {
@@ -176,7 +176,7 @@ public class MQHandler {
 
     @Async
     public void send(String channel, MQData data) {
-        Preconditions.checkArgument(this.registeredChannels.contains(channel), "Cannot send a message to an unregistered channel.");
+        if(!channel.equals(this.channelName)) Preconditions.checkArgument(this.registeredChannels.contains(channel), "Cannot send a message to an unregistered channel.");
         try {
             data.getData().addProperty("ezIdPacketName", data.getName());
             this.channel.basicPublish("", channel, null, data.getData().toString().getBytes());

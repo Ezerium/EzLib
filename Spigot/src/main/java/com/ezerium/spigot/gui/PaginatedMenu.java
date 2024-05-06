@@ -3,6 +3,7 @@ package com.ezerium.spigot.gui;
 import com.ezerium.spigot.gui.button.Button;
 import com.ezerium.spigot.gui.button.impl.GlassButton;
 import com.ezerium.spigot.gui.button.impl.NextButton;
+import com.ezerium.spigot.gui.button.impl.PreviousButton;
 import com.google.common.base.Preconditions;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -106,7 +107,7 @@ public abstract class PaginatedMenu extends Menu {
         int size = getSize(player);
         Position position = getButtonPosition(player);
         if (page > 1) {
-            buttons.put((position == Position.BOTTOM ? size - 9 - 1 : 0), new NextButton(this));
+            buttons.put((position == Position.BOTTOM ? size - 9 : 0), new PreviousButton(this));
         }
 
         if (((float) items.size() / itemsPerPage) > 1.0F) {
