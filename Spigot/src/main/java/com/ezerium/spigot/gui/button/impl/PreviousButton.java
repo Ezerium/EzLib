@@ -36,6 +36,8 @@ public class PreviousButton extends Button {
 
     @Override
     public void click(Player player, ClickType clickType, int slot) {
-
+        menu.setPage(menu.getPage() - 1);
+        player.closeInventory();
+        menu.open(player);
     }
 }
