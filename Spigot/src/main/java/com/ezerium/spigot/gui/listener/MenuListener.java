@@ -27,8 +27,8 @@ public class MenuListener implements Listener {
         Button button = buttons.get(event.getSlot());
         if (button == null) return;
 
-        button.click(player, event.getClick(), event.getSlot());
         event.setCancelled(button.cancelClick(player));
+        button.click(player, event.getClick(), event.getSlot());
     }
 
     @EventHandler

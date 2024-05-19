@@ -105,10 +105,10 @@ public class PluginProcessor extends AbstractProcessor {
             if (plugin.authors().length == 1) builder.append("author: ").append(plugin.authors()[0]).append("\n");
             else builder.append("authors: [").append(String.join(", ", plugin.authors())).append("]\n");
         }
-        if (plugin.depend().length > 0) builder.append("depend: [").append(String.join(", ", depend)).append("]\n");
-        if (plugin.softDepend().length > 0) builder.append("soft-depend: [").append(String.join(", ", plugin.softDepend())).append("]\n");
-        if (plugin.loadBefore().length > 0) builder.append("load-before: [").append(String.join(", ", plugin.loadBefore())).append("]\n");
-        if (plugin.loadAfter().length > 0) builder.append("load-after: [").append(String.join(", ", plugin.loadAfter())).append("]\n");
+        if (!depend.isEmpty()) builder.append("depend: [").append(String.join(", ", depend)).append("]\n");
+        if (plugin.softDepend().length > 0) builder.append("softdepend: [").append(String.join(", ", plugin.softDepend())).append("]\n");
+        if (plugin.loadBefore().length > 0) builder.append("loadbefore: [").append(String.join(", ", plugin.loadBefore())).append("]\n");
+        if (plugin.loadAfter().length > 0) builder.append("loadafter: [").append(String.join(", ", plugin.loadAfter())).append("]\n");
         return builder;
     }
 

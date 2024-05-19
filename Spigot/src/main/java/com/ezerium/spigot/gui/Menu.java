@@ -32,6 +32,8 @@ public abstract class Menu {
     private boolean update = false;
     @Setter
     private long updateTicks = 20L;
+    @Getter
+    private Inventory inventory;
 
     @NotNull
     abstract public String getTitle(Player player);
@@ -45,15 +47,14 @@ public abstract class Menu {
 
     abstract public Map<Integer, Button> getButtons(Player player);
 
-    public void onClose(Player player) {
+    public void onClose(Player player, Inventory inventory) {
     }
 
-    public void onOpen(Player player) {
+    public void onOpen(Player player, Inventory inventory) {
     }
 
     public void open(Player player) {
         InventoryType inventoryType = getInventoryType(player);
-        Inventory inventory;
         if (inventoryType != null) {
             inventory = Bukkit.createInventory(player, inventoryType, Util.format(getTitle(player)));
         } else {
@@ -84,7 +85,7 @@ public abstract class Menu {
         }
 
         player.openInventory(inventory);
-        onOpen(player);
+        onOpen(player, inventory);
     }
 
     public final void remove(Player player) {
@@ -93,7 +94,7 @@ public abstract class Menu {
             task = null;
         }
 
-        onClose(player);
+        onClose(player, inventory);
         OPENED_MENUS.remove(player.getUniqueId());
     }
 }

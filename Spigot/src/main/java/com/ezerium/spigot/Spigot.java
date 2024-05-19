@@ -88,6 +88,7 @@ public final class Spigot implements Listener {
             InjectHandler.inject(field);
         }
 
+        if (INSTANCE != null) return;
         INSTANCE = this;
 
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
