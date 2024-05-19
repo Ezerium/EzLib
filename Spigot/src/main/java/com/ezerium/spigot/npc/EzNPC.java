@@ -39,7 +39,6 @@ import java.util.function.Consumer;
 @Getter
 public class EzNPC {
 
-    @Getter
     private static final Map<String, EzNPC> npcs = new HashMap<>();
     /*public static Object TEAM;
 
@@ -59,6 +58,10 @@ public class EzNPC {
             LoggerUtil.err("Something went wrong while trying to create the NPC team.");
         }
     }*/
+
+    public static Map<String, EzNPC> getNpcs() {
+        return npcs == null ? new HashMap<>() : npcs;
+    }
 
     public static Team TEAM;
 
@@ -277,6 +280,7 @@ public class EzNPC {
         body.setPosition(location.getDirection());
         body.setPlayerUUID(uuid);
         body.setPitch(location.getPitch());
+        body.setYaw(location.getYaw());
 
         body.setX(location.getX());
         body.setY(location.getY());
